@@ -47,7 +47,7 @@ spec:
         - name: DATASTORE
           value: 'REMOTE'
         - name: FRONTEND_HOST
-          value: 'frontend.default.svc.cluster.local'
+          value: 'frontend'
         ports:
         - containerPort: 7777
           name: pos

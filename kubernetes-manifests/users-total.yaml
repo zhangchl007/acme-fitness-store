@@ -39,7 +39,7 @@ spec:
       - name: acmefit-users-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-user:latest
+      - image: springcloudservices/fitness-users:latest
         imagePullPolicy: "Always"
         name: users
         env:
