@@ -8,6 +8,17 @@ This app is developed by team behind www.cloudjourney.io
 
 The current version of the application passes JSON Web Tokens (JWT) for authentication on certain API calls. The application will not work as expected if the `users` service is not present to issue / authenticate these tokens.
 
+## Quick Start
+
+To deploy everything into the `default` namespace, run the following commands:
+
+```
+echo 'password=<value>' > kubernetes-manifests/.env.secret
+kustomize build kubernetes-manifests/ | kubectl apply -f -
+```
+
+If you don't have kustomize, or if you prefer to apply each yaml by hand, continue with the rest of the docs.
+
 ## Datastore Dependent Services
 
 This section covers the deployment of the datastore dependent microservices. It is recommended to deploy these services first.
@@ -57,7 +68,7 @@ The payment service does not have an associated datastore. It can be deployed wi
 kubectl apply -f payment-total.yaml
 ```
    NOTE: PAYMENT SERVICE MUST BE UP FIRST IN ORDER FOR ORDER SERVICE TO PROPERLY COMPLETE TRANSACTIONS
-   
+
 ### Order Service
 
 Before deploying the orders datastore (postgres) and order service please add a secret for the service to use in authenticating with the cache.
