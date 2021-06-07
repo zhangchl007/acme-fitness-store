@@ -18,6 +18,31 @@ Other deployment modes coming soon
 
 ![Acmeshop Architecture](./acmeshop.png)
 
+## TL;DR for deploying to k8s
+
+Install [Spring Cloud Gateway for kubernetes](https://docs.pivotal.io/scg-k8s/1-0/installation.html) before running the following command.
+
+```
+echo 'password=<value>' > kubernetes-manifests/.env.secret
+kustomize build kubernetes-manifests/ | kubectl apply -f -
+```
+
+Note: `<value>` can be any value. It will be the password used by the deployed apps to access the deployed databases.
+
+To visit the site, you may port-forward the gateway service:
+
+```
+kubectl port-forward service/gateway-acme 8080:80
+```
+
+Or add a DNS record to either a DNS registry or in your local `/etc/hosts`:
+
+```
+<your.ingress.ip.address>   gateway-acme.spring.animalrescue.online
+```
+
+If you'd like to use [API portal for VMware Tanzu](https://docs.pivotal.io/api-portal/1-0/installing.html) to view all the endpoints, you will need to install API portal with `api-portal-server.sourceUrls: "http://scg-operator.spring-cloud-gateway/openapi"` set in the helm values. The [gateway resource](./kubernetes-manifests/gateway.yaml) assumes API portal is using the URL `http://api-portal.spring.animalrescue.online`.
+
 ## Instructions
 
 1. Clone this repository
@@ -67,14 +92,6 @@ The files marked with `*` are updated to work with Spring Cloud Gateway and API 
 
 * [docker-compose](./docker-compose)
 * [kubernetes-manifest](./kubernetes-manifests)
-
-    Fastest path to k8s:
-
-    ```
-    echo 'password=<value>' > kubernetes-manifests/.env.secret
-    kustomize build kubernetes-manifests/ | kubectl apply -f -
-    ```
-
 * [aws-fargate](./aws-fargate)
 
 ### Additional Info
