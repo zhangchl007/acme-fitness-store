@@ -43,6 +43,8 @@ Or add a DNS record to either a DNS registry or in your local `/etc/hosts`:
 
 If you'd like to use [API portal for VMware Tanzu](https://docs.pivotal.io/api-portal/1-0/installing.html) to view all the endpoints, you will need to install API portal with `api-portal-server.sourceUrls: "http://scg-operator.spring-cloud-gateway/openapi"` set in the helm values. The [gateway resource](./kubernetes-manifests/gateway.yaml) assumes API portal is using the URL `http://api-portal.spring.animalrescue.online`.
 
+We deploy to `acme-fitness` namespace by default (kustomize will create that namespace as well). If you prefer a different namespace, you may change it in [kubernetes-manifests/kustomization.yaml](kubernetes-manifests/kustomization.yaml).
+
 ## Instructions
 
 1. Clone this repository
