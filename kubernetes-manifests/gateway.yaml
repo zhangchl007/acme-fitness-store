@@ -7,7 +7,7 @@ spec:
     serverUrl: http://gateway-acme.spring.animalrescue.online
     title: "ACME Fitness Gateway"
     description: "ACME Fitness application for Spring Cloud Gateway commercial product demos."
-    documentation: "https://github.com/vmwarecloudadvocacy/acme_fitness_demo/"
+    documentation: "https://github.com/spring-cloud-services-samples/acme_fitness_demo/"
     version: "1.0.0-K8s"
     cors:
       allowedOrigins:

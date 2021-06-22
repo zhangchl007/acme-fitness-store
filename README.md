@@ -68,6 +68,7 @@ We deploy to `acme-fitness` namespace by default (kustomize will create that nam
 ├── kubernetes-manifests
 │   ├── README.md
 │   ├── gateway.yaml*
+│   ├── api-portal-ingress.yaml*
 │   ├── cart-redis-total.yaml
 │   ├── cart-total.yaml
 │   ├── cart-gateway-config.yaml*
