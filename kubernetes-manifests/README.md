@@ -19,6 +19,12 @@ kustomize build kubernetes-manifests/ | kubectl apply -f -
 
 If you don't have kustomize, or if you prefer to apply each yaml by hand, continue with the rest of the docs.
 
+Gateway CORS is configured to allow traffic from `http://api-portal.spring.animalrescue.online`. If you'd like to try out endpoints on API portal, you may create an Ingress resource for API portal as the command below then add the DNS record to your `/etc/hosts` file.
+
+```
+kubectl apply -f kubernetes-manifests/api-portal-ingress.yaml
+```
+
 ## Datastore Dependent Services
 
 This section covers the deployment of the datastore dependent microservices. It is recommended to deploy these services first.
