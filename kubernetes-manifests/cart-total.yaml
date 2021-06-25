@@ -55,9 +55,9 @@ spec:
         - name: CART_PORT
           value: '5000'
         - name: USER_HOST
-          value: 'users'
+          value: 'gateway'
         - name: USER_PORT
-          value: '8083'
+          value: '80'
         - name: TRACER_HOST
           value: 'wavefront-proxy'
         - name: TRACER_PORT

@@ -40,6 +40,13 @@ spec:
         - StripPrefix=1
       tags:
         - users
+    - predicates:
+        - Path=/verify-token
+        - Method=POST
+      filters:
+        - StripPrefix=0
+      tags:
+        - users
 ---
 apiVersion: "tanzu.vmware.com/v1"
 kind: SpringCloudGatewayMapping
