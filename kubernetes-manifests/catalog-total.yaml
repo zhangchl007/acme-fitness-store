@@ -62,16 +62,8 @@ spec:
           value: 'users'
         - name: USERS_PORT
           value: '8083'
-        - name: WAVEFRONT_SERVER
-          valueFrom:
-            secretKeyRef:
-              name: wavefront-secret
-              key: wavefront.uri
-        - name: WAVEFRONT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: wavefront-secret
-              key: wavefront.api-token
+        - name: ZIPKIN_URL
+          value: http://wavefront-proxy:9411
         ports:
         - containerPort: 8082
           name: catalog

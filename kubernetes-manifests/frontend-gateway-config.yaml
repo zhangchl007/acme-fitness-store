@@ -22,6 +22,6 @@ metadata:
   name: frontend-routes
 spec:
   gatewayRef:
-    name: gateway-acme
+    name: gateway
   routeConfigRef:
     name: frontend-route-config

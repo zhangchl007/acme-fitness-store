@@ -21,6 +21,6 @@ metadata:
   name: order-routes
 spec:
   gatewayRef:
-    name: gateway-acme
+    name: gateway
   routeConfigRef:
     name: order-route-config

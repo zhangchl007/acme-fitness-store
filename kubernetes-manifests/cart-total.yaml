@@ -39,7 +39,7 @@ spec:
       - name: acmefit-cart-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-cart:latest
+      - image: springcloudservices/fitness-cart:wavefront
         imagePullPolicy: "Always"
         name: cart
         env:
@@ -58,10 +58,10 @@ spec:
           value: 'users'
         - name: USER_PORT
           value: '8083'
-        - name: JAEGER_AGENT_HOST
-          value: 'localhost'
-        - name: JAEGER_AGENT_PORT
-          value: '6831'
+        - name: TRACER_HOST
+          value: 'wavefront-proxy'
+        - name: TRACER_PORT
+          value: '9411'
         - name: AUTH_MODE
           value: '1'
         ports:

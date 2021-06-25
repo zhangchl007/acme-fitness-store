@@ -34,13 +34,13 @@ Note: `<value>` can be any value. It will be the password used by the deployed a
 To visit the site, you may port-forward the gateway service:
 
 ```
-kubectl port-forward service/gateway-acme 8080:80
+kubectl port-forward service/gateway 8080:80
 ```
 
 Or add a DNS record to either a DNS registry or in your local `/etc/hosts`:
 
 ```
-<your.ingress.ip.address>   gateway-acme.spring.animalrescue.online
+<your.ingress.ip.address>   acme-fitness.spring.animalrescue.online
 ```
 
 If you'd like to use [API portal for VMware Tanzu](https://docs.pivotal.io/api-portal/1-0/installing.html) to view all the endpoints, you will need to install API portal with `api-portal-server.sourceUrls: "http://scg-operator.spring-cloud-gateway/openapi"` set in the helm values. The [gateway resource](./kubernetes-manifests/gateway.yaml) assumes API portal is using the URL `http://api-portal.spring.animalrescue.online`. To create an Ingress resource for your API portal with this URL, you may run:

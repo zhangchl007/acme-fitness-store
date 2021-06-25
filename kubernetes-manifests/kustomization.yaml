@@ -27,6 +27,7 @@ generatorOptions:
 
 resources:
   - namespace.yaml
+  - wavefront.yaml
   - gateway.yaml
   - cart-redis-total.yaml
   - cart-total.yaml

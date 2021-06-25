@@ -43,6 +43,6 @@ metadata:
   name: catalog-routes
 spec:
   gatewayRef:
-    name: gateway-acme
+    name: gateway
   routeConfigRef:
     name: catalog-route-config

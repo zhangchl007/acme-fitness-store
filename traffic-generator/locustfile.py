@@ -1,8 +1,9 @@
 # This program will generate traffic for ACME Fitness Shop App. It simulates both Authenticated and Guest user scenarios. You can run this program either from Command line or from
 # the web based UI. Refer to the "locust" documentation for further information. 
 
-from locust import HttpLocust, TaskSet, task, TaskSequence, seq_task, Locust
+import jwt
 import random
+from locust import HttpLocust, TaskSet, task, TaskSequence, seq_task
 
 # List of users (pre-loaded into ACME Fitness shop)
 users = ["eric", "phoebe", "dwight", "han"] 
@@ -43,14 +44,18 @@ class AuthUserBrowsing(TaskSequence):
 
     def on_start(self):
         self.login()
-    
+
     @seq_task(1)
     @task(1)
     def login(self):
         user = random.choice(users)
         logging.info("Auth User - Login user " + user)
-        body = self.client.post("/login/", json={"username": user, "password":"vmware1!"}).json()
-        self.locust.userid = body["token"]
+        body = self.client.post("/login/", json={"username": user, "password": "vmware1!"}).json()
+        token = body["access_token"]
+        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        self.locust.userid = decoded_token["sub"]
+        self.client.headers.update({'Authorization': "Bearer " + token})
+        logging.info("Logged in user id: " + self.locust.userid)
 
     @seq_task(2)
     @task(1)
@@ -74,7 +79,7 @@ class AuthUserBrowsing(TaskSequence):
     def addToCart(self):
         self.listCatalogItems()
         productid = random.choice(products)
-        logging.info("Add to Cart for user " + self.locust.userid)
+        logging.info("Auth User - Add to Cart for user " + self.locust.userid)
         cart = self.client.post("/cart/item/add/" + self.locust.userid, json={
                   "name": productid,
                   "price": "100",
@@ -82,37 +87,41 @@ class AuthUserBrowsing(TaskSequence):
                   "quantity": random.randint(1,2),
                   "itemid": productid
                 })
+
+        logging.info("Add to cart response: " + str(cart))
         products.clear()
 
     
     @seq_task(5)
     @task(1)
     def checkout(self):
-        userCart = self.client.get("/cart/items/" + self.locust.userid).json()
-        order = self.client.post("/order/add/"+ self.locust.userid, json={ "userid":"8888",
-                "firstname":"Eric",
-                "lastname": "Cartman",
-                "address":{
-                    "street":"20 Riding Lane Av",
-                    "city":"San Francisco",
-                    "zip":"10201",
-                    "state": "CA",
-                    "country":"USA"},
-                "email":"jblaze@marvel.com",
-                "delivery":"UPS/FEDEX",
-                "card":{
-                    "type":"amex/visa/mastercard/bahubali",
-                    "number":"349834797981", 
-                    "expMonth":"12",
-                    "expYear": "2022",
-                    "ccv":"123"
-                },
-                "cart":[
-                    {"id":"1234", "description":"redpants", "quantity":"1", "price":"4"},
-                    {"id":"5678", "description":"bluepants", "quantity":"1", "price":"4"}
-                ],
-                "total":"100"})
-
+        logging.info("Auth User - Checkout for user " + self.locust.userid)
+        self.client.get("/cart/items/" + self.locust.userid).json()
+        order = self.client.post("/order/add/" + self.locust.userid, json={
+            "userid": self.locust.userid,
+            "firstname": "Eric",
+            "lastname": "Cartman",
+            "address": {
+                "street": "20 Riding Lane Av",
+                "city": "San Francisco",
+                "zip": "10201",
+                "state": "CA",
+                "country": "USA"},
+            "email": "jblaze@marvel.com",
+            "delivery": "UPS/FEDEX",
+            "card": {
+                "type": "amex/visa/mastercard/bahubali",
+                "number": "349834797981",
+                "expMonth": "12",
+                "expYear": "2022",
+                "ccv": "123"
+            },
+            "cart": [
+                {"id": "1234", "description": "redpants", "quantity": "1", "price": "4"},
+                {"id": "5678", "description": "bluepants", "quantity": "1", "price": "4"}
+            ],
+            "total": "100"})
+        logging.info("Checkout response: " + str(order))
 
     def listCatalogItems(self):
         items = self.client.get("/products").json()["data"]

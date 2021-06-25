@@ -36,7 +36,7 @@ spec:
         service: payment
     spec:
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-payment:latest
+      - image: springcloudservices/fitness-payment:wavefront
         name: payment
         env:
         - name: PAYMENT_PORT
@@ -45,10 +45,8 @@ spec:
           value: 'users'
         - name: USERS_PORT
           value: '8083'
-        - name: JAEGER_AGENT_HOST
-          value: 'localhost'
-        - name: JAEGER_AGENT_PORT
-          value: '6832'
+        - name: ZIPKIN_URL
+          value: http://wavefront-proxy:9411
         ports:
         - containerPort: 9000
           name: payment

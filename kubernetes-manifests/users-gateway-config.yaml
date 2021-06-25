@@ -47,6 +47,6 @@ metadata:
   name: users-routes
 spec:
   gatewayRef:
-    name: gateway-acme
+    name: gateway
   routeConfigRef:
     name: users-route-config
