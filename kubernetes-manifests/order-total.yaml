@@ -39,7 +39,7 @@ spec:
       - name: acmefit-order-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-order:latest
+      - image: springcloudservices/fitness-order:wavefront
         # orderpostgres:latest
         name: order
         env:
@@ -70,13 +70,13 @@ spec:
         - name: PAYMENT_HOST
           value: 'payment'
         - name: USER_HOST
-          value: 'users'
+          value: 'gateway'
         - name: USER_PORT
-          value: '8083'
-        - name: JAEGER_AGENT_HOST
-          value: 'localhost'
-        - name: JAEGER_AGENT_PORT
-          value: '6831'
+          value: '80'
+        - name: TRACER_HOST
+          value: 'wavefront-proxy'
+        - name: TRACER_PORT
+          value: '9411'
         ports:
         - containerPort: 6000
           name: order
