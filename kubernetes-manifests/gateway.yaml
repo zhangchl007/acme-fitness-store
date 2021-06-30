@@ -4,9 +4,11 @@ metadata:
   name: gateway
 spec:
   metrics:
-    secret: wavefront-secret
+    wavefront:
+      secret: wavefront-secret
   tracing:
-    secret: wavefront-secret
+    wavefront:
+      secret: wavefront-secret
   api:
     serverUrl: http://acme-fitness.spring.animalrescue.online
     title: "ACME Fitness Gateway"
