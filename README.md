@@ -2,60 +2,111 @@
 
 ## Getting Started
 
-These instructions will allow you to run entire ACME Fitness Shop
-
-## Requirements
-
-Based on the type of deployment the requirements will vary
-
-1. **docker-compose** - Needs docker-compose version 1.23.1+
-2. **kubernetes**
-3. **AWS Fargate**
-
-Other deployment modes coming soon
+These instructions will allow you to run entire ACME Fitness Shop with [Spring Cloud Gateway for kubernetes](https://docs.pivotal.io/scg-k8s/1-0/).
 
 ## Overview
 
 ![Acmeshop Architecture](./acmeshop.png)
 
-## TL;DR for deploying to k8s
+Source code of the related apps:
+- Front End: https://github.com/pivotal-cf/acme-shopping
+- User Service: https://github.com/pivotal-cf/acme-user
+- Catalog: https://github.com/pivotal-cf/acme-catalog
+- Cart: https://github.com/pivotal-cf/acme-cart
+- Order: https://github.com/pivotal-cf/acme-order
+- Payment: https://github.com/pivotal-cf/acme-payment
 
-Install [Spring Cloud Gateway for kubernetes](https://docs.pivotal.io/scg-k8s/1-0/installation.html) before running the following command.
+## Try it out
 
-```
-echo 'password=<value>' > kubernetes-manifests/.env.secret
-echo 'wavefront.api-token=<token>
-wavefront.uri=<uri>' > kubernetes-manifests/.env.wavefront.secret
-kustomize build kubernetes-manifests/ | kubectl apply -f -
-```
+### Deploying to k8s
 
-Note: `<value>` can be any value. It will be the password used by the deployed apps to access the deployed databases.
+1. [Install Spring Cloud Gateway for kubernetes](https://docs.pivotal.io/scg-k8s/1-0/installation.html) before running the following command.
 
-To visit the site, you may port-forward the gateway service:
+1. Create a secret file to specify the password for databases to use and for the deployed apps to access the databases. The `<value>` can be any value.
 
-```
-kubectl port-forward service/gateway 8080:80
-```
+    ```
+    echo 'password=<value>' > kubernetes-manifests/.env.secret
+    ```
 
-Or add a DNS record to either a DNS registry or in your local `/etc/hosts`:
+1. Create a secret file for wavefront access. This is for your gateway to publish metrics and tracing data. 
+
+    ```
+    echo 'wavefront.api-token=<token>
+    wavefront.uri=<uri>' > kubernetes-manifests/.env.wavefront.secret
+    kustomize build kubernetes-manifests/ | kubectl apply -f -
+    ```
+    
+    If you don't have wavefront instance/token handy, you may disable tracing and metrics by deleting the `tracing` and `metrics` section in [gateway.yaml](./kubernetes-manifests/gateway.yaml), and removing `wavefront-secret` secret generator in [kustomization.yaml](./kubernetes-manifests/kustomization.yaml).
+
+1. Deploy all resources with Kustomize:
+   
+    ```
+    kustomize build kubernetes-manifests/ | kubectl apply -f -
+    ```
+
+All resources are deployed to `acme-fitness` namespace. You may change the target namespace in [kustomization.yaml](./kubernetes-manifests/kustomization.yaml).
+
+### Accessing the app
+
+There is an ingress resource created for the gateway. You may add a DNS record to either a DNS registry or in your local `/etc/hosts`:
 
 ```
 <your.ingress.ip.address>   acme-fitness.spring.animalrescue.online
 ```
 
-If you'd like to use [API portal for VMware Tanzu](https://docs.pivotal.io/api-portal/1-0/installing.html) to view all the endpoints, you will need to install API portal with `api-portal-server.sourceUrls: "http://scg-operator.spring-cloud-gateway/openapi"` set in the helm values. The [gateway resource](./kubernetes-manifests/gateway.yaml) assumes API portal is using the URL `http://api-portal.spring.animalrescue.online`. To create an Ingress resource for your API portal with this URL, you may run:
+You may also port-forward the gateway service to expose the app:
 
 ```
-kubectl apply -f kubernetes-manifests/api-portal-ingress.yaml # Assuming API portal is installed in `api-portal` namespace.
+kubectl port-forward service/gateway 8080:80 -n acme-fitness
 ```
 
-We deploy to `acme-fitness` namespace by default (kustomize will create that namespace as well). If you prefer a different namespace, you may change it in [kubernetes-manifests/kustomization.yaml](kubernetes-manifests/kustomization.yaml).
+### Available users
 
-## Instructions
+There are four pre-created users loaded into the database:
 
-1. Clone this repository
+| User   | Password   |
+|--------|------------|
+| eric   | `vmware1!` |
+| dwight | `vmware1!` |
+| han    | `vmware1!` |
+| phoebe | `vmware1!` |
 
-2. You will notice the following directory structure
+* You MUST login as one of the users mentioned above to access all the pages in the application
+* The current user service will set a cookie ```logged_in``` in the browser. This cookie contains the User ID returned from the user service
+* The service uses JWT and sets 2 cookies - ```logged_in``` and ```refresh_token```
+
+### API portal integration
+
+If you'd like to use [API portal for VMware Tanzu](https://docs.pivotal.io/api-portal/1-0/installing.html) to view all the endpoints, you will need to install API portal with helm value:
+
+```
+api-portal-server:
+   sourceUrls: "http://scg-operator.spring-cloud-gateway/openapi"
+``` 
+
+Or set environment variable on a pre-installed API portal deployment:
+
+```
+kubectl set env deployment.apps/api-portal-server API_PORTAL_SOURCE_URLS="http://scg-operator.spring-cloud-gateway/openapi"
+```
+
+If your API portal is deployed in a different cluster, then you will need to add an ingress for `scg-operator` in your SCG installation namespace to expose the it, and use that url instead. 
+
+The [gateway resource](./kubernetes-manifests/gateway.yaml) assumes API portal is using the URL `http://api-portal.spring.animalrescue.online`. To create an Ingress resource for your API portal with this URL, you may run:
+
+```
+kubectl apply -f kubernetes-manifests/api-portal-ingress.yaml -n api-portal
+```
+
+You may update the urls in the gateway resource if you want to use a different url for your API portal. 
+
+### SSO integration
+
+You may check out the `sso` branch to see how to replace the `acme-user` service with [SSO integration on Spring Cloud Gateway](https://docs.pivotal.io/scg-k8s/1-0/using-sso.html). 
+
+## File Structure
+
+You will notice the following directory structure
 
 ```text
 ├── README.md
@@ -96,12 +147,6 @@ We deploy to `acme-fitness` namespace by default (kustomize will create that nam
 ```
 
 The files marked with `*` are updated to work with Spring Cloud Gateway and API portal.
-
-3. Switch to the appropriate directory for deployment
-
-* [docker-compose](./docker-compose)
-* [kubernetes-manifest](./kubernetes-manifests)
-* [aws-fargate](./aws-fargate)
 
 ### Additional Info
 

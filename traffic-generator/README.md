@@ -2,7 +2,7 @@
 
 ### Requirements
 
-1. Needs Python3.6 and above
+1. Needs Python 3.6 or 3.7.
 
 2. Locust - [Locust](https://docs.locust.io/en/stable/installation.html)
 
