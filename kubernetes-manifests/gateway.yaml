@@ -3,12 +3,6 @@ kind: SpringCloudGateway
 metadata:
   name: gateway
 spec:
-  metrics:
-    wavefront:
-      secret: wavefront-secret
-  tracing:
-    wavefront:
-      secret: wavefront-secret
   api:
     serverUrl: http://acme-fitness.spring.animalrescue.online
     title: "ACME Fitness Gateway"
@@ -18,11 +12,12 @@ spec:
     cors:
       allowedOrigins:
       - "http://api-portal.spring.animalrescue.online"
-      allowedMethods:
-      - "GET"
-      - "PUT"
-      - "POST"
-      - "DELETE"
+  metrics:
+    wavefront:
+      secret: wavefront-secret
+  tracing:
+    wavefront:
+      secret: wavefront-secret
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
