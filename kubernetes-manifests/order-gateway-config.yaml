@@ -7,7 +7,9 @@ spec:
     name: order
     port: 6000
   routes:
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/order/add/{userId}
         - Method=POST
       filters:

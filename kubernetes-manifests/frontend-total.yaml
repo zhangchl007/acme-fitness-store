@@ -39,7 +39,8 @@ spec:
         service: frontend
     spec:
       containers:
-      - image: springcloudservices/fitness-frontend
+      - image: springcloudservices/fitness-frontend:sso
+        imagePullPolicy: Always
         name: frontend
         ports:
         - containerPort: 8080

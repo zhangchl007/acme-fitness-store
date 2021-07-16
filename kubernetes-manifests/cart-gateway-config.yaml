@@ -7,35 +7,45 @@ spec:
     name: cart
     port: 5000
   routes:
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/cart/item/add/{userId}
         - Method=POST
       filters:
         - StripPrefix=0
       tags:
         - cart
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/cart/item/modify/{userId}
         - Method=POST
       filters:
         - StripPrefix=0
       tags:
         - cart
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/cart/items/{userId}
         - Method=GET
       filters:
         - StripPrefix=0
       tags:
         - cart
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/cart/clear/{userId}
         - Method=GET
       filters:
         - StripPrefix=0
       tags:
         - cart
-    - predicates:
+    - ssoEnabled: true
+      tokenRelay: true
+      predicates:
         - Path=/cart/total/{userId}
         - Method=GET
       filters:

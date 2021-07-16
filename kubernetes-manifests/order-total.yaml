@@ -40,7 +40,7 @@ spec:
         emptyDir: {}
       containers:
       - image: springcloudservices/fitness-order:wavefront
-        # orderpostgres:latest
+        imagePullPolicy: "Always"
         name: order
         env:
         - name: ORDER_DB_HOST

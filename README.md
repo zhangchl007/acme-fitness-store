@@ -6,11 +6,13 @@ These instructions will allow you to run entire ACME Fitness Shop with [Spring C
 
 ## Overview
 
-![Acmeshop Architecture](./acmeshop.png)
+This branch replaces `User Service` with the [SSO integration of Spring Cloud Gateway](https://docs-pcf-staging.sc2-04-pcf1-apps.oc.vmware.com/scg-k8s/1-0/using-sso.html).
 
+![Acmeshop Architecture](./acmeshop.png)
+You may update it if you want to use a different url for your API portal. 
 Source code of the related apps:
 - Front End: https://github.com/pivotal-cf/acme-shopping
-- User Service: https://github.com/pivotal-cf/acme-user
+- User Service (Not used on this branch): https://github.com/pivotal-cf/acme-user 
 - Catalog: https://github.com/pivotal-cf/acme-catalog
 - Cart: https://github.com/pivotal-cf/acme-cart
 - Order: https://github.com/pivotal-cf/acme-order
@@ -21,6 +23,26 @@ Source code of the related apps:
 ### Deploying to k8s
 
 1. [Install Spring Cloud Gateway for kubernetes](https://docs.pivotal.io/scg-k8s/1-0/installation.html) before running the following command.
+
+1. Build [the custom extension](https://docs-pcf-staging.sc2-04-pcf1-apps.oc.vmware.com/scg-k8s/1-0/developing-extensions.html) jar for the custom `WhoAmI` filter:
+
+   ```
+   cd ./kubernetes-manifests/custom-filters/whoami
+   ./gradlew jar
+   cd -
+   ```
+   
+   This filter parses user info from security context and replaces the `getUser` endpoint from the `acme-user` service.
+
+1. Creating [sso secret file](https://docs-pcf-staging.sc2-04-pcf1-apps.oc.vmware.com/scg-k8s/1-0/using-sso.html) for Kustomize to create secret with:
+
+   ```
+   echo 'client-id=<client-id>
+   client-secret=<client-secret>
+   scope=openid,profile
+   issuer-uri=<issuer-uri>
+   ' > kubernetes-manifests/.env.sso.secret
+   ```
 
 1. Create a secret file to specify the password for databases to use and for the deployed apps to access the databases. The `<value>` can be any value.
 
@@ -100,10 +122,6 @@ kubectl apply -f kubernetes-manifests/api-portal-ingress.yaml -n api-portal
 ```
 
 You may update the urls in the gateway resource if you want to use a different url for your API portal. 
-
-### SSO integration
-
-You may check out the `sso` branch to see how to replace the `acme-user` service with [SSO integration on Spring Cloud Gateway](https://docs.pivotal.io/scg-k8s/1-0/using-sso.html). 
 
 ## File Structure
 

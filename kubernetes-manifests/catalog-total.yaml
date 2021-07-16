@@ -59,9 +59,9 @@ spec:
         - name: CATALOG_VERSION
           value: 'v1'
         - name: USERS_HOST
-          value: 'users'
+          value: 'gateway'
         - name: USERS_PORT
-          value: '8083'
+          value: '80'
         - name: ZIPKIN_URL
           value: http://wavefront-proxy:9411
         ports:

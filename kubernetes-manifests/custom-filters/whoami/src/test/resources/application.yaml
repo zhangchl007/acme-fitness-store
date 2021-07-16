@@ -1,0 +1,17 @@
+logging.level.com.vmware.scg.extensions: debug
+logging.level.org.springframework.cloud: debug
+logging.level.io.projectreactor.netty: trace
+spring:
+  cloud:
+    gateway:
+      routes:
+        - uri: no://op
+          predicates:
+            - Path=/empty-body/**
+          filters:
+            - WhoAmI
+        - uri: https://example.com
+          predicates:
+            - Path=/non-null-body/**
+          filters:
+            - WhoAmI

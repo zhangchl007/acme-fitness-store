@@ -37,14 +37,15 @@ spec:
     spec:
       containers:
       - image: springcloudservices/fitness-payment:wavefront
+        imagePullPolicy: "Always"
         name: payment
         env:
         - name: PAYMENT_PORT
           value: '9000'
         - name: USERS_HOST
-          value: 'users'
+          value: 'gateway'
         - name: USERS_PORT
-          value: '8083'
+          value: '80'
         - name: ZIPKIN_URL
           value: http://wavefront-proxy:9411
         ports:

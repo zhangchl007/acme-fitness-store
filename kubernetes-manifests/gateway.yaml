@@ -23,6 +23,13 @@ spec:
       secret: wavefront-secret
       application: acme-fitness-demo
       service: acme-gateway
+  sso:
+    secret: gateway-sso-secret
+  extensions:
+    - whoami-filter-extension
+  env:
+    - name: logging.level.com.vmware.scg.extensions
+      value: debug
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

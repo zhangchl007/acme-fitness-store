@@ -21,6 +21,14 @@ secretGenerator:
 - name: wavefront-secret
   envs:
   - .env.wavefront.secret
+- name: gateway-sso-secret
+  envs:
+  - .env.sso.secret
+
+configMapGenerator:
+  - name: whoami-filter-extension
+    files:
+      - custom-filters/whoami/build/libs/whoami-0.0.1-SNAPSHOT.jar
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -40,10 +48,10 @@ resources:
   - order-db-total.yaml
   - order-total.yaml
   - order-gateway-config.yaml
-  - users-db-initdb-configmap.yaml
-  - users-db-total.yaml
-  - users-redis-total.yaml
-  - users-total.yaml
+#  - users-db-initdb-configmap.yaml
+#  - users-db-total.yaml
+#  - users-redis-total.yaml
+#  - users-total.yaml
   - users-gateway-config.yaml
   - frontend-total.yaml
   - frontend-gateway-config.yaml
