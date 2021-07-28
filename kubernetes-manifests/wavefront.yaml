@@ -38,7 +38,7 @@ spec:
               key: wavefront.api-token
         # Zipkin Tracing Environment Variable
         - name: WAVEFRONT_PROXY_ARGS
-          value: --traceZipkinListenerPorts 9411 --traceZipkinApplicationName acme-fitness-apps
+          value: --traceZipkinListenerPorts 9411 --traceZipkinApplicationName acme-fitness-demo
         ports:
         - containerPort: 2878
           protocol: TCP
