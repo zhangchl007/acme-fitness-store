@@ -3,8 +3,11 @@ kind: SpringCloudGateway
 metadata:
   name: gateway
 spec:
+  serviceAccount:
+    name: acme-fitness-service-account
   api:
     serverUrl: http://acme-fitness.spring.animalrescue.online
+    groupId: acme-fitness
     title: "ACME Fitness Gateway"
     description: "ACME Fitness application for Spring Cloud Gateway commercial product demos."
     documentation: "https://github.com/spring-cloud-services-samples/acme_fitness_demo/"
@@ -23,6 +26,16 @@ spec:
       secret: wavefront-secret
       application: acme-fitness-demo
       service: acme-gateway
+  extensions:
+    secretsProviders:
+      - name: vault-provider
+        vault:
+          roleName: acme-fitness-role
+    filters:
+      apiKey:
+        enabled: true
+        secretsProviderName: vault-provider
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
