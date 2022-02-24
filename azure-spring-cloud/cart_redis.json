@@ -1,0 +1,12 @@
+{
+  "name": "redis_ef49e",
+  "properties": {
+    "clientType": "java",
+    "targetId": "/subscriptions/4274ebdf-fab7-4711-8332-afab2fef9aeb/resourceGroups/asc-develop/providers/Microsoft.Cache/Redis/acme-fitnesss/databases/1",
+    "authInfo": {
+      "authType": "secret",
+      "name": "",
+      "secret": ""
+    }
+  }
+}

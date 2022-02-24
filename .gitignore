@@ -3,3 +3,5 @@ __pycache__
 .env*.secret
 .idea
 custom-filters
+
+repos/
