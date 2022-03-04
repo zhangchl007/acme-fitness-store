@@ -7,7 +7,7 @@ readonly REPO_ROOT="${PROJECT_ROOT}/repos"
 
 readonly REDIS_NAME="acme-fitness-redis"
 readonly COSMOS_ACCOUNT="acme-fitness-cosmosdb"
-readonly MONGO_CONNECTION="user_service_mongodb"
+readonly USER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
 readonly USER_DB_NAME="users"
 readonly CART_SERVICE="cart-service"
 readonly USER_SERVICE="user-service"
@@ -28,7 +28,7 @@ function create_dependencies() {
   echo "Creating CosmosDB Account $COSMOS_ACCOUNT"
   az cosmosdb create --name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
-    --kind MongoDB --server-version "4.0" \
+    --kind MongoDB --server-version "3.6" \
     --default-consistency-level Eventual \
     --enable-automatic-failover true \
     --locations regionName="East US" failoverPriority=0 isZoneRedundant=False \
@@ -74,12 +74,16 @@ function create_user_service() {
     --service $SPRING_CLOUD_INSTANCE \
     --app $USER_SERVICE \
     --deployment default \
-    --tg $RESOURCE_GROUP \
+    --resource-group $RESOURCE_GROUP \
+    --target-resource-group $RESOURCE_GROUP \
     --account $COSMOS_ACCOUNT \
     --database $USER_DB_NAME \
     --secret \
     --client-type java \
-    --connection $MONGO_CONNECTION
+    --connection $USER_SERVICE_MONGO_CONNECTION
+
+  echo "user-service app successfully created. Please create a service connector to redis before continuing." #TODO: link to instructions
+  read -n 1 -s -r -p "Press any key to continue."
 }
 
 function deploy_cart_service() {
@@ -90,16 +94,20 @@ function deploy_cart_service() {
   local redis_conn_str=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --app $CART_SERVICE --deployment default --connection $redis_conn_name | jq '.configurations[0].value' -r)
   az spring-cloud app deploy --name $CART_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "CART_PORT=8080" "AZURE_REDIS_CONNECTIONSTRING=$redis_conn_str" \
+    --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=$redis_conn_str" \
     --source-path "$REPO_ROOT/acme-cart"
 }
 
 function deploy_user_service() {
-  local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $MONGO_CONNECTION --app $USER_SERVICE | jq '.configurations[0].value' -r)
+  local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $USER_SERVICE_MONGO_CONNECTION --app $USER_SERVICE | jq '.configurations[0].value' -r)
+
+  local redis_conn_name=$(az spring-cloud connection list --app $USER_SERVICE -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --query "[?contains(@.name, 'redis')]" | jq -r '.[0].name')
+  local redis_conn_str=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --app $USER_SERVICE --deployment default --connection $redis_conn_name | jq '.configurations[0].value' -r)
 
   az spring-cloud app deploy --name $USER_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "DB_CONNECTION_URL=$mongo_connection_url"
+    --env "USERS_PORT=8080" "MONGODB_CONNECTIONSTRING=$mongo_connection_url" "REDIS_CONNECTIONSTRING=$redis_conn_str" \
+    --source-path "$REPO_ROOT/acme-user"
 }
 
 function main() {
@@ -108,8 +116,10 @@ function main() {
   create_builder
   configure_gateway
   create_cart_service
+  create_user_service
 
   deploy_cart_service
+  deploy_user_service
 }
 
 function usage() {

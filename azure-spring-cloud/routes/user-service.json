@@ -45,7 +45,31 @@
   },
   {
     "predicates": [
+      "Path=/users",
+      "Method=GET"
+    ],
+    "filters": [
+      "StripPrefix=0"
+    ],
+    "tags": [
+      "users"
+    ]
+  },
+  {
+    "predicates": [
       "Path=/users/logout",
+      "Method=POST"
+    ],
+    "filters": [
+      "StripPrefix=1"
+    ],
+    "tags": [
+      "users"
+    ]
+  },
+  {
+    "predicates": [
+      "Path=/users/register",
       "Method=POST"
     ],
     "filters": [
@@ -66,5 +90,17 @@
     "tags": [
       "users"
     ]
-  }
+  },
+  {
+  "predicates": [
+    "Path=/refresh-token",
+    "Method=POST"
+  ],
+  "filters": [
+    "StripPrefix=0"
+  ],
+  "tags": [
+    "users"
+  ]
+}
 ]
