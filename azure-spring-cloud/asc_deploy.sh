@@ -41,13 +41,6 @@ function create_dependencies() {
     --enable-automatic-failover true \
     --locations regionName="East US" failoverPriority=0 isZoneRedundant=False \
     --locations regionName="Central US" failoverPriority=1 isZoneRedundant=False
-  az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
-    --resource-group $RESOURCE_GROUP \
-    --name $USER_DB_NAME
-
-  az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
-    --resource-group $RESOURCE_GROUP \
-    --name $ORDER_DB_NAME
 
   az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
@@ -93,7 +86,7 @@ function create_user_service() {
     --resource-group $RESOURCE_GROUP \
     --target-resource-group $RESOURCE_GROUP \
     --account $COSMOS_ACCOUNT \
-    --database $USER_DB_NAME \
+    --database $ACMEFIT_DB_NAME \
     --secret \
     --client-type java \
     --connection $USER_SERVICE_MONGO_CONNECTION
@@ -114,7 +107,7 @@ function create_order_service() {
     --resource-group $RESOURCE_GROUP \
     --target-resource-group $RESOURCE_GROUP \
     --account $COSMOS_ACCOUNT \
-    --database $ORDER_DB_NAME \
+    --database $ACMEFIT_DB_NAME \
     --secret \
     --client-type java \
     --connection $ORDER_SERVICE_MONGO_CONNECTION
@@ -218,16 +211,18 @@ function main() {
   create_dependencies
   create_builder
   configure_gateway
-  create_cart_service
   create_user_service
+  create_cart_service
   create_order_service
   create_payment_service
+  create_catalog_service
   create_frontend_app
 
-  deploy_cart_service
   deploy_user_service
+  deploy_cart_service
   deploy_order_service
   deploy_payment_service
+  deploy_catalog_service
   deploy_frontend_app
 }
 
