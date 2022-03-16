@@ -118,6 +118,7 @@ function create_catalog_service() {
   az spring-cloud app create --name $CATALOG_SERVICE
   az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
 
+  #TODO: change client type to springboot once rewrite to java is ready
   az spring-cloud connection create cosmos-mongo -g $RESOURCE_GROUP \
     --service $SPRING_CLOUD_INSTANCE \
     --app $CATALOG_SERVICE \
