@@ -8,10 +8,14 @@ readonly REPO_ROOT="${PROJECT_ROOT}/repos"
 readonly REDIS_NAME="acme-fitness-redis"
 readonly COSMOS_ACCOUNT="acme-fitness-cosmosdb"
 readonly USER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
+readonly ORDER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
 readonly USER_DB_NAME="users"
+readonly ORDER_DB_NAME="orders"
 readonly CART_SERVICE="cart-service"
 readonly USER_SERVICE="user-service"
-readonly CUSTOM_BUILDER="nodejs-go-python-builder"
+readonly ORDER_SERVICE="order-service"
+readonly PAYMENT_SERVICE="payment-service"
+readonly CUSTOM_BUILDER="no-bindings-builder"
 
 RESOURCE_GROUP=''
 SPRING_CLOUD_INSTANCE=''
@@ -28,7 +32,7 @@ function create_dependencies() {
   echo "Creating CosmosDB Account $COSMOS_ACCOUNT"
   az cosmosdb create --name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
-    --kind MongoDB --server-version "3.6" \
+    --kind MongoDB --server-version "4.0" \
     --default-consistency-level Eventual \
     --enable-automatic-failover true \
     --locations regionName="East US" failoverPriority=0 isZoneRedundant=False \
@@ -36,6 +40,10 @@ function create_dependencies() {
   az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
     --name $USER_DB_NAME
+
+  az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
+    --resource-group $RESOURCE_GROUP \
+    --name $ORDER_DB_NAME
 }
 
 function create_builder() {
@@ -86,6 +94,28 @@ function create_user_service() {
   read -n 1 -s -r -p "Press any key to continue."
 }
 
+function create_order_service() {
+  echo "Creating order service"
+  az spring-cloud app create --name $ORDER_SERVICE
+  az spring-cloud gateway route-config create --name $ORDER_SERVICE --app-name $ORDER_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/order-service.json"
+
+  az spring-cloud connection create cosmos-mongo -g $RESOURCE_GROUP \
+    --service $SPRING_CLOUD_INSTANCE \
+    --app $ORDER_SERVICE \
+    --deployment default \
+    --resource-group $RESOURCE_GROUP \
+    --target-resource-group $RESOURCE_GROUP \
+    --account $COSMOS_ACCOUNT \
+    --database $ORDER_DB_NAME \
+    --secret \
+    --client-type java \
+    --connection $ORDER_SERVICE_MONGO_CONNECTION
+}
+
+function create_payment_service() {
+  az spring-cloud app create --name $PAYMENT_SERVICE
+}
+
 function deploy_cart_service() {
   echo "Deploying cart-service application"
   #  local redis_id=$(az redis show -n acme-cart-redis | jq -r '.id')
@@ -99,6 +129,7 @@ function deploy_cart_service() {
 }
 
 function deploy_user_service() {
+  echo "Deploying user-service application"
   local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $USER_SERVICE_MONGO_CONNECTION --app $USER_SERVICE | jq '.configurations[0].value' -r)
 
   local redis_conn_name=$(az spring-cloud connection list --app $USER_SERVICE -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --query "[?contains(@.name, 'redis')]" | jq -r '.[0].name')
@@ -110,6 +141,23 @@ function deploy_user_service() {
     --source-path "$REPO_ROOT/acme-user"
 }
 
+function deploy_order_service() {
+  echo "Deploying user-service application"
+  local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $ORDER_SERVICE_MONGO_CONNECTION --app $ORDER_SERVICE | jq '.configurations[0].value' -r)
+
+  az spring-cloud app deploy --name $ORDER_SERVICE \
+    --builder $CUSTOM_BUILDER \
+    --env "MongodDb__Client__ConnectionString=$mongo_connection_url" \
+    --source-path "$REPO_ROOT/acme-order"
+}
+
+function deploy_payment_service() {
+    az spring-cloud app deploy --name $PAYMENT_SERVICE \
+      --builder $CUSTOM_BUILDER \
+      --env "PAYMENT_PORT=8080" \
+      --source-path "$REPO_ROOT/acme-payment"
+}
+
 function main() {
   configure_defaults
   create_dependencies
@@ -117,9 +165,13 @@ function main() {
   configure_gateway
   create_cart_service
   create_user_service
+  create_order_service
+  create_payment_service
 
   deploy_cart_service
   deploy_user_service
+  deploy_order_service
+  deploy_payment_service
 }
 
 function usage() {
