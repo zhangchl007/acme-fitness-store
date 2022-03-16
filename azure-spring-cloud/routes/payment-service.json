@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Make a payment",
+    "description": "Pay for an Order",
+    "predicates": [
+      "Path=/pay",
+      "Method=POST"
+    ],
+    "filters": [
+      "StripPrefix=0"
+    ],
+    "tags": [
+      "payment"
+    ]
+  }
+]

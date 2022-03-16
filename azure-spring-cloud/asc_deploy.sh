@@ -9,12 +9,16 @@ readonly REDIS_NAME="acme-fitness-redis"
 readonly COSMOS_ACCOUNT="acme-fitness-cosmosdb"
 readonly USER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
 readonly ORDER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
+readonly CATALOG_SERVICE_MONGO_CONNECTION="catalog_service_mongodb"
+readonly ACMEFIT_DB_NAME="acmefit"
 readonly USER_DB_NAME="users"
 readonly ORDER_DB_NAME="orders"
 readonly CART_SERVICE="cart-service"
 readonly USER_SERVICE="user-service"
 readonly ORDER_SERVICE="order-service"
 readonly PAYMENT_SERVICE="payment-service"
+readonly CATALOG_SERVICE="catalog-service"
+readonly FRONTEND_APP="frontend"
 readonly CUSTOM_BUILDER="no-bindings-builder"
 
 RESOURCE_GROUP=''
@@ -44,6 +48,10 @@ function create_dependencies() {
   az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
     --name $ORDER_DB_NAME
+
+  az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
+    --resource-group $RESOURCE_GROUP \
+    --name $ACMEFIT_DB_NAME
 }
 
 function create_builder() {
@@ -112,8 +120,34 @@ function create_order_service() {
     --connection $ORDER_SERVICE_MONGO_CONNECTION
 }
 
+function create_catalog_service() {
+  echo "Creating catalog service"
+  az spring-cloud app create --name $CATALOG_SERVICE
+  az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
+
+  az spring-cloud connection create cosmos-mongo -g $RESOURCE_GROUP \
+    --service $SPRING_CLOUD_INSTANCE \
+    --app $CATALOG_SERVICE \
+    --deployment default \
+    --resource-group $RESOURCE_GROUP \
+    --target-resource-group $RESOURCE_GROUP \
+    --account $COSMOS_ACCOUNT \
+    --database $ACMEFIT_DB_NAME \
+    --secret \
+    --client-type java \
+    --connection $CATALOG_SERVICE_MONGO_CONNECTION
+}
+
 function create_payment_service() {
+  echo "Creating payment service"
   az spring-cloud app create --name $PAYMENT_SERVICE
+  az spring-cloud gateway route-config create --name $PAYMENT_SERVICE --app-name $PAYMENT_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/payment-service.json"
+}
+
+function create_frontend_app() {
+  echo "Creating frontend"
+  az spring-cloud app create --name $FRONTEND_APP
+  az spring-cloud gateway route-config create --name $FRONTEND_APP --app-name $FRONTEND_APP --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/frontend.json"
 }
 
 function deploy_cart_service() {
@@ -151,11 +185,32 @@ function deploy_order_service() {
     --source-path "$REPO_ROOT/acme-order"
 }
 
+function deploy_catalog_service() {
+  echo "Deploying catalog-service application"
+  local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $CATALOG_SERVICE_MONGO_CONNECTION --app $CATALOG_SERVICE | jq '.configurations[0].value' -r)
+
+  az spring-cloud app deploy --name $CATALOG_SERVICE \
+    --builder $CUSTOM_BUILDER \
+    --env "CATALOG_PORT=8080" "MONGODB_CONNECTIONSTRING=$mongo_connection_url" \
+    --source-path "$REPO_ROOT/acme-catalog"
+}
+
 function deploy_payment_service() {
-    az spring-cloud app deploy --name $PAYMENT_SERVICE \
-      --builder $CUSTOM_BUILDER \
-      --env "PAYMENT_PORT=8080" \
-      --source-path "$REPO_ROOT/acme-payment"
+  echo "Deploying payment-service application"
+
+  az spring-cloud app deploy --name $PAYMENT_SERVICE \
+    --builder $CUSTOM_BUILDER \
+    --env "PAYMENT_PORT=8080" \
+    --source-path "$REPO_ROOT/acme-payment"
+}
+
+function deploy_frontend_app() {
+  echo "Deploying frontend application"
+
+  rm -rf "$REPO_ROOT/acme-shopping/node_modules"
+  az spring-cloud app deploy --name $FRONTEND_APP \
+    --builder $CUSTOM_BUILDER \
+    --source-path "$REPO_ROOT/acme-shopping"
 }
 
 function main() {
@@ -167,11 +222,13 @@ function main() {
   create_user_service
   create_order_service
   create_payment_service
+  create_frontend_app
 
   deploy_cart_service
   deploy_user_service
   deploy_order_service
   deploy_payment_service
+  deploy_frontend_app
 }
 
 function usage() {
