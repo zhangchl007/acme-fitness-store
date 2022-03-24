@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace acme_order.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("order")]
     [ApiController]
     public class OrderController : ControllerBase
     {
