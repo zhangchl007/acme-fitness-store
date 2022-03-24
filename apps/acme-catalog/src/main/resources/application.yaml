@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:rootpassword@localhost:27017
+      database: "ProductsDb"
+  application:
+    name: "acme-catalog"
+  mvc:
+    static-path-pattern: /static/images/**
+management:
+  endpoint:
+    health:
+      show-details: always
+
+  endpoints:
+    web:
+      exposure:
+        include: '*'
