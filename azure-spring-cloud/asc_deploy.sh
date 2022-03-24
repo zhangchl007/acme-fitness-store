@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
-readonly REPO_ROOT="${PROJECT_ROOT}/repos"
+readonly APPS_ROOT="${PROJECT_ROOT}/apps"
 
 readonly REDIS_NAME="acme-fitness-redis"
 readonly COSMOS_ACCOUNT="acme-fitness-cosmosdb"
@@ -39,8 +39,7 @@ function create_dependencies() {
     --kind MongoDB --server-version "4.0" \
     --default-consistency-level Eventual \
     --enable-automatic-failover true \
-    --locations regionName="East US" failoverPriority=0 isZoneRedundant=False \
-    --locations regionName="Central US" failoverPriority=1 isZoneRedundant=False
+    --locations regionName="East US" failoverPriority=0 isZoneRedundant=False
 
   az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
@@ -118,7 +117,6 @@ function create_catalog_service() {
   az spring-cloud app create --name $CATALOG_SERVICE
   az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
 
-  #TODO: change client type to springboot once rewrite to java is ready
   az spring-cloud connection create cosmos-mongo -g $RESOURCE_GROUP \
     --service $SPRING_CLOUD_INSTANCE \
     --app $CATALOG_SERVICE \
@@ -128,7 +126,7 @@ function create_catalog_service() {
     --account $COSMOS_ACCOUNT \
     --database $ACMEFIT_DB_NAME \
     --secret \
-    --client-type java \
+    --client-type springboot \
     --connection $CATALOG_SERVICE_MONGO_CONNECTION
 }
 
@@ -146,14 +144,12 @@ function create_frontend_app() {
 
 function deploy_cart_service() {
   echo "Deploying cart-service application"
-  #  local redis_id=$(az redis show -n acme-cart-redis | jq -r '.id')
-  #  git clone git@github.com:pivotal-cf/acme-cart.git "$REPO_ROOT/acme-cart" --branch azure-spring-cloud-deployment
   local redis_conn_name=$(az spring-cloud connection list --app $CART_SERVICE -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default | jq -r '.[0].name')
   local redis_conn_str=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --app $CART_SERVICE --deployment default --connection $redis_conn_name | jq '.configurations[0].value' -r)
   az spring-cloud app deploy --name $CART_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=$redis_conn_str" \
-    --source-path "$REPO_ROOT/acme-cart"
+    --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=$redis_conn_str" "USER_HOST=user-service.default.svc.cluster.local" "USER_PORT=80"\
+    --source-path "$APPS_ROOT/acme-cart"
 }
 
 function deploy_user_service() {
@@ -166,7 +162,7 @@ function deploy_user_service() {
   az spring-cloud app deploy --name $USER_SERVICE \
     --builder $CUSTOM_BUILDER \
     --env "USERS_PORT=8080" "MONGODB_CONNECTIONSTRING=$mongo_connection_url" "REDIS_CONNECTIONSTRING=$redis_conn_str" \
-    --source-path "$REPO_ROOT/acme-user"
+    --source-path "$APPS_ROOT/acme-user"
 }
 
 function deploy_order_service() {
@@ -175,18 +171,15 @@ function deploy_order_service() {
 
   az spring-cloud app deploy --name $ORDER_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "MongodDb__Client__ConnectionString=$mongo_connection_url" \
-    --source-path "$REPO_ROOT/acme-order"
+    --env "MongodDb__Client__ConnectionString=$mongo_connection_url" "AcmeServiceSettings__UserServiceUrl=http://user-service.default.svc.cluster.local" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" \
+    --source-path "$APPS_ROOT/acme-order"
 }
 
 function deploy_catalog_service() {
   echo "Deploying catalog-service application"
-  local mongo_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $CATALOG_SERVICE_MONGO_CONNECTION --app $CATALOG_SERVICE | jq '.configurations[0].value' -r)
 
   az spring-cloud app deploy --name $CATALOG_SERVICE \
-    --builder $CUSTOM_BUILDER \
-    --env "CATALOG_PORT=8080" "MONGODB_CONNECTIONSTRING=$mongo_connection_url" \
-    --source-path "$REPO_ROOT/acme-catalog"
+    --source-path "$APPS_ROOT/acme-catalog"
 }
 
 function deploy_payment_service() {
@@ -194,17 +187,17 @@ function deploy_payment_service() {
 
   az spring-cloud app deploy --name $PAYMENT_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "PAYMENT_PORT=8080" \
-    --source-path "$REPO_ROOT/acme-payment"
+    --env "PAYMENT_PORT=8080" "USERS_HOST=user-service.default.svc.cluster.local" "USERS_PORT=80" \
+    --source-path "$APPS_ROOT/acme-payment"
 }
 
 function deploy_frontend_app() {
   echo "Deploying frontend application"
 
-  rm -rf "$REPO_ROOT/acme-shopping/node_modules"
+  rm -rf "$APPS_ROOT/acme-shopping/node_modules"
   az spring-cloud app deploy --name $FRONTEND_APP \
     --builder $CUSTOM_BUILDER \
-    --source-path "$REPO_ROOT/acme-shopping"
+    --source-path "$APPS_ROOT/acme-shopping"
 }
 
 function main() {
