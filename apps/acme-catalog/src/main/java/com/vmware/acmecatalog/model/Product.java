@@ -6,20 +6,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Document(collection = "catalog")
 public class Product {
 
     @Id
     private String id;
-
-//    @JsonProperty("imageurl1")
-    private String imageurl1;
-
-//    @JsonProperty("imageurl2")
-    private String imageurl2;
-
-//    @JsonProperty("imageurl3")
-    private String imageurl3;
+    private String imageUrl1;
+    private String imageUrl2;
+    private String imageUrl3;
 
     private String name;
     private String shortDescription;
@@ -35,28 +31,28 @@ public class Product {
         this.id = id;
     }
 
-    public String getImageurl1() {
-        return imageurl1;
+    public String getImageUrl1() {
+        return imageUrl1;
     }
 
-    public void setImageurl1(String imageurl1) {
-        this.imageurl1 = imageurl1;
+    public void setImageUrl1(String imageUrl1) {
+        this.imageUrl1 = imageUrl1;
     }
 
-    public String getImageurl2() {
-        return imageurl2;
+    public String getImageUrl2() {
+        return imageUrl2;
     }
 
-    public void setImageurl2(String imageurl2) {
-        this.imageurl2 = imageurl2;
+    public void setImageUrl2(String imageUrl2) {
+        this.imageUrl2 = imageUrl2;
     }
 
-    public String getImageurl3() {
-        return imageurl3;
+    public String getImageUrl3() {
+        return imageUrl3;
     }
 
-    public void setImageurl3(String imageurl3) {
-        this.imageurl3 = imageurl3;
+    public void setImageUrl3(String imageUrl3) {
+        this.imageUrl3 = imageUrl3;
     }
 
     public String getName() {

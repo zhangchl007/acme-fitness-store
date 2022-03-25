@@ -30,7 +30,7 @@
     ],
     "filters": [
       "StripPrefix=0",
-      "SetPath=/liveness"
+      "SetPath=/actuator/health/liveness"
     ],
     "tags": [
       "catalog"
