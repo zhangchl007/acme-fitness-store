@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AcmeCatalogService implements IAcmeCatalogService {
+public class AcmeCatalogService {
 
     private AcmeCatalogRepository acmeCatalogRepository;
 
@@ -18,12 +18,10 @@ public class AcmeCatalogService implements IAcmeCatalogService {
         this.acmeCatalogRepository = acmeCatalogRepository;
     }
 
-    @Override
     public GetProductsResponse getProducts() {
         return new GetProductsResponse(acmeCatalogRepository.findAll());
     }
 
-    @Override
     public GetProductResponse getProduct(String id) {
         var productFound = acmeCatalogRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
@@ -31,7 +29,6 @@ public class AcmeCatalogService implements IAcmeCatalogService {
         return new GetProductResponse(productFound, HttpStatus.OK.value());
     }
 
-    @Override
     public CreateProductResponse createProduct(Product newProduct) {
         var productSaved = acmeCatalogRepository.save(newProduct);
         String message;
