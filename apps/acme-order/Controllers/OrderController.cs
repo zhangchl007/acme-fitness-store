@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using acme_order.Auth;
 using acme_order.Response;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 
 namespace acme_order.Controllers
 {
@@ -24,7 +25,8 @@ namespace acme_order.Controllers
         [ServiceFilter(typeof(AuthorizeResource))]
         public ActionResult<OrderCreateResponse> Create(string userid, Order orderIn)
         {
-            return _orderService.Create(userid, orderIn);
+            var authorization = HttpContext.Request.Headers[HeaderNames.Authorization].ToString();
+            return _orderService.Create(userid, orderIn, authorization);
         }
 
         [HttpGet("all")]

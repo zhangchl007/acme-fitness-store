@@ -265,6 +265,7 @@
                       window.location.href = "/transaction.html"
                     }
                     else {
+                      console.log("payment status: " + data.payment.status)
                       alert(data.payment.message)
                       //location.reload()
                     }

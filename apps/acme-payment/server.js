@@ -57,7 +57,7 @@ app.post('/pay', function (req, res) {
     'access_token': token
   });
   var options = {
-    uri: userUrl + '/verify-token',
+    uri: 'http://' + userHost + ':' + userPort + '/verify-token',
     body: data,
   }
   return new Promise(function(resolve, reject) {

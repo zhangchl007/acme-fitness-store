@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using acme_order.Configuration;
 using acme_order.Request;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 
 namespace acme_order.Auth
@@ -21,16 +23,15 @@ namespace acme_order.Auth
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            const string accessTokenKey = "Authorization";
             var headers = context.HttpContext.Request.Headers;
 
-            if (!headers.Keys.Any(x => x.Equals(accessTokenKey))) throw new AuthenticationException();
-            var accessToken = headers[accessTokenKey];
+            if (!headers.Keys.Any(x => x.Equals(HeaderNames.Authorization))) throw new AuthenticationException();
+            var accessToken = headers[HeaderNames.Authorization];
             accessToken = accessToken.ToString().Replace("Bearer ", "");
             
             if (string.IsNullOrEmpty(accessToken)) throw new AuthenticationException();
