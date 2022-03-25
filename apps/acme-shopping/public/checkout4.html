@@ -239,7 +239,7 @@
             card['expMonth'] = sessionStorage.expMonth;
             card['expYear'] = sessionStorage.expYear;
             orderBlob['card'] = card;
-            orderBlob['cart'] = sessionStorage.cart
+            orderBlob['cart'] = JSON.parse(sessionStorage.cart);
 
             // Get token
             var token = getCookie();

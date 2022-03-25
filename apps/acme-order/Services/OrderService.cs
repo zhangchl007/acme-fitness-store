@@ -90,7 +90,8 @@ namespace acme_order.Services
                         Number = card.Number,
                         ExpMonth = card.ExpMonth,
                         ExpYear = card.ExpYear,
-                        Ccv = card.Ccv
+                        Ccv = card.Ccv,
+                        Type = card.Type
                     },
                     Total = total
                 }
