@@ -1,14 +1,14 @@
 package com.vmware.acmecatalog.response;
 
-import com.vmware.acmecatalog.model.Product;
+import com.vmware.acmecatalog.Request.ProductRequest;
 
 public class CreateProductResponse {
 
     private String message;
-    private Product resourceId;
+    private ProductRequest resourceId;
     private Integer status;
 
-    public CreateProductResponse(String message, Product resourceId, Integer status) {
+    public CreateProductResponse(String message, ProductRequest resourceId, Integer status) {
         this.message = message;
         this.resourceId = resourceId;
         this.status = status;
@@ -22,11 +22,11 @@ public class CreateProductResponse {
         this.message = message;
     }
 
-    public Product getResourceId() {
+    public ProductRequest getResourceId() {
         return resourceId;
     }
 
-    public void setResourceId(Product resourceId) {
+    public void setResourceId(ProductRequest resourceId) {
         this.resourceId = resourceId;
     }
 

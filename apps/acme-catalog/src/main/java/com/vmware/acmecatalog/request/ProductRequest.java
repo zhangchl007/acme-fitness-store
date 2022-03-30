@@ -1,18 +1,13 @@
-package com.vmware.acmecatalog.model;
+package com.vmware.acmecatalog.Request;
 
+import com.vmware.acmecatalog.model.Product;
 
-import com.vmware.acmecatalog.Request.ProductRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+public class ProductRequest {
 
-import javax.persistence.*;
-
-
-@Entity
-@Table(name = "catalog")
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String imageUrl1;
     private String imageUrl2;
@@ -21,31 +16,25 @@ public class Product {
     private String shortDescription;
     private String description;
     private Double price;
-    private String tags;
+    private List<String> tags = new ArrayList<>();
 
-    public static Product fromProductRequestToProduct(ProductRequest productRequest) {
+    public static ProductRequest fromProductToProductRequest(Product product) {
 
-        Product product = new Product();
-        product.setPrice(productRequest.getPrice());
-        product.setDescription(productRequest.getDescription());
-        product.setName(productRequest.getName());
-        product.setImageUrl1(productRequest.getImageUrl1());
-        product.setImageUrl2(productRequest.getImageUrl2());
-        product.setImageUrl3(productRequest.getImageUrl3());
-        product.setShortDescription(productRequest.getShortDescription());
+        ProductRequest productRequest = new ProductRequest();
+        productRequest.setId(product.getId());
+        productRequest.setPrice(product.getPrice());
+        productRequest.setDescription(product.getDescription());
+        productRequest.setName(product.getName());
+        productRequest.setImageUrl1(product.getImageUrl1());
+        productRequest.setImageUrl2(product.getImageUrl2());
+        productRequest.setImageUrl3(product.getImageUrl3());
+        productRequest.setShortDescription(product.getShortDescription());
 
-        var tags = "";
-
-        if (productRequest.getTags() != null && !productRequest.getTags().isEmpty()) {
-            for (int i = 0; i < productRequest.getTags().size(); i++) {
-                tags = tags + productRequest.getTags().get(i);
-                if (i < productRequest.getTags().size() - 1) {
-                    tags = tags + ",";
-                }
-            }
+        if (product.getTags() != null && !product.getTags().equals("")) {
+            var tags = product.getTags().split(",");
+            productRequest.setTags(Arrays.asList(tags));
         }
-        product.setTags(tags);
-        return product;
+        return productRequest;
     }
 
     public Long getId() {
@@ -112,11 +101,11 @@ public class Product {
         this.price = price;
     }
 
-    public String getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 }

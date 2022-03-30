@@ -1,7 +1,9 @@
 package com.vmware.acmecatalog.repository;
 
 import com.vmware.acmecatalog.model.Product;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface AcmeCatalogRepository extends MongoRepository<Product, String> {
+@Repository
+public interface AcmeCatalogRepository extends CrudRepository<Product, Long> {
 }

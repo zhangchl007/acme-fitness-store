@@ -1,6 +1,6 @@
 package com.vmware.acmecatalog.controller;
 
-import com.vmware.acmecatalog.model.Product;
+import com.vmware.acmecatalog.Request.ProductRequest;
 import com.vmware.acmecatalog.response.CreateProductResponse;
 import com.vmware.acmecatalog.response.GetProductResponse;
 import com.vmware.acmecatalog.response.GetProductsResponse;
@@ -27,7 +27,7 @@ public class AcmeCatalogController {
     }
 
     @PostMapping("/products")
-    public CreateProductResponse createProduct(@RequestBody Product newProduct) {
+    public CreateProductResponse createProduct(@RequestBody ProductRequest newProduct) {
         return acmeCatalogService.createProduct(newProduct);
     }
 }

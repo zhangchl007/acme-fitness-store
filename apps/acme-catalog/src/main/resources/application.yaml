@@ -1,12 +1,17 @@
 spring:
-  data:
-    mongodb:
-      uri: mongodb://root:rootpassword@localhost:27017
-      database: "ProductsDb"
   application:
     name: "acme-catalog"
   mvc:
     static-path-pattern: /static/images/**
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ProductsDb?createDatabaseIfNotExist=true&useSSL=false
+    username: "root"
+    password: "rootpassword"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
 management:
   endpoint:
     health:

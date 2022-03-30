@@ -1,22 +1,22 @@
 package com.vmware.acmecatalog.response;
 
-import com.vmware.acmecatalog.model.Product;
+import com.vmware.acmecatalog.Request.ProductRequest;
 
 public class GetProductResponse {
 
-    private Product data;
+    private ProductRequest data;
     private Integer status;
 
-    public GetProductResponse(Product data, Integer status) {
+    public GetProductResponse(ProductRequest data, Integer status) {
         this.data = data;
         this.status = status;
     }
 
-    public Product getData() {
+    public ProductRequest getData() {
         return data;
     }
 
-    public void setData(Product data) {
+    public void setData(ProductRequest data) {
         this.data = data;
     }
 
