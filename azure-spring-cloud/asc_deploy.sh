@@ -171,7 +171,7 @@ function deploy_order_service() {
 
   az spring-cloud app deploy --name $ORDER_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "MongodDb__Client__ConnectionString=$mongo_connection_url" "AcmeServiceSettings__UserServiceUrl=http://user-service.default.svc.cluster.local" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" \
+    --env "OrderDatabaseSettings__ConnectionString=$mongo_connection_url" "AcmeServiceSettings__UserServiceUrl=http://user-service.default.svc.cluster.local" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" \
     --source-path "$APPS_ROOT/acme-order"
 }
 
