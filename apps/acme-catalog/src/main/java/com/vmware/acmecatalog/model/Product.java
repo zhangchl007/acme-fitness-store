@@ -1,10 +1,14 @@
 package com.vmware.acmecatalog.model;
 
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import com.vmware.acmecatalog.Request.ProductRequest;
-
-
-import javax.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 
 @Entity
@@ -12,8 +16,11 @@ import javax.persistence.*;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(columnDefinition = "varchar(36)")
+    private String id;
+
     private String imageUrl1;
     private String imageUrl2;
     private String imageUrl3;
@@ -48,11 +55,11 @@ public class Product {
         return product;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

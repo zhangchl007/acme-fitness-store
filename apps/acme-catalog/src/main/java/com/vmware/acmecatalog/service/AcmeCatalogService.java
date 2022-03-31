@@ -1,17 +1,18 @@
 package com.vmware.acmecatalog.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vmware.acmecatalog.Request.ProductRequest;
 import com.vmware.acmecatalog.model.Product;
-import com.vmware.acmecatalog.model.ProductNotFoundException;
 import com.vmware.acmecatalog.repository.AcmeCatalogRepository;
 import com.vmware.acmecatalog.response.CreateProductResponse;
 import com.vmware.acmecatalog.response.GetProductResponse;
 import com.vmware.acmecatalog.response.GetProductsResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AcmeCatalogService implements IAcmeCatalogService {
@@ -37,8 +38,8 @@ public class AcmeCatalogService implements IAcmeCatalogService {
 
     @Override
     public GetProductResponse getProduct(String id) {
-        var productFound = acmeCatalogRepository.findById(Long.parseLong(id))
-                .orElseThrow(() -> new ProductNotFoundException(id));
+        var productFound = acmeCatalogRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find product with id " + id));
 
         return new GetProductResponse(ProductRequest.fromProductToProductRequest(productFound), HttpStatus.OK.value());
     }

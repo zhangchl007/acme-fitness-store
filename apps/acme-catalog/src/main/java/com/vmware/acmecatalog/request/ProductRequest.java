@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ProductRequest {
 
-    private Long id;
+    private String id;
     private String imageUrl1;
     private String imageUrl2;
     private String imageUrl3;
@@ -37,11 +37,11 @@ public class ProductRequest {
         return productRequest;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

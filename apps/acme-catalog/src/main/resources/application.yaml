@@ -4,12 +4,12 @@ spring:
   mvc:
     static-path-pattern: /static/images/**
   datasource:
-    url: jdbc:postgresql://localhost:5432/ProductsDb?createDatabaseIfNotExist=true&useSSL=false
+    url: jdbc:postgresql://localhost:5432/acmefit?useSSL=false&currentSchema=public
     username: "root"
     password: "rootpassword"
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 management:
