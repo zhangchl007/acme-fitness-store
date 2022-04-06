@@ -11,6 +11,9 @@ readonly USER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
 readonly ORDER_SERVICE_MONGO_CONNECTION="user_service_mongodb"
 readonly CATALOG_SERVICE_MONGO_CONNECTION="catalog_service_mongodb"
 readonly ACMEFIT_DB_NAME="acmefit"
+readonly ACMEFIT_POSTGRES_DB_PASSWORD=$(openssl rand -base64 32)
+readonly ACMEFIT_POSTGRES_DB_USER=dbadmin
+readonly ACMEFIT_POSTGRES_SERVER="acmefit-db-server"
 readonly USER_DB_NAME="users"
 readonly ORDER_DB_NAME="orders"
 readonly CART_SERVICE="cart-service"
@@ -44,6 +47,18 @@ function create_dependencies() {
   az cosmosdb mongodb database create --account-name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
     --name $ACMEFIT_DB_NAME
+
+  az postgres server create --name $ACMEFIT_POSTGRES_SERVER \
+      --resource-group $RESOURCE_GROUP \
+      --location "South Central US" \
+      --admin-user $ACMEFIT_POSTGRES_DB_USER \
+      --admin-password $ACMEFIT_POSTGRES_DB_PASSWORD \
+      --sku-name GP_Gen5_2 \
+      --version 11
+
+  az postgres db create \
+      --name $ACMEFIT_DB_NAME \
+      --server-name $ACMEFIT_POSTGRES_SERVER
 }
 
 function create_builder() {
@@ -117,17 +132,16 @@ function create_catalog_service() {
   az spring-cloud app create --name $CATALOG_SERVICE
   az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
 
-  az spring-cloud connection create cosmos-mongo -g $RESOURCE_GROUP \
-    --service $SPRING_CLOUD_INSTANCE \
-    --app $CATALOG_SERVICE \
-    --deployment default \
-    --resource-group $RESOURCE_GROUP \
-    --target-resource-group $RESOURCE_GROUP \
-    --account $COSMOS_ACCOUNT \
-    --database $ACMEFIT_DB_NAME \
-    --secret \
-    --client-type springboot \
-    --connection $CATALOG_SERVICE_MONGO_CONNECTION
+  az spring-cloud connection create postgres \
+      --resource-group $RESOURCE_GROUP \
+      --service $SPRING_CLOUD_INSTANCE \
+      --app $CATALOG_SERVICE \
+      --deployment default \
+      --tg $RESOURCE_GROUP \
+      --server $ACMEFIT_POSTGRES_SERVER \
+      --database $ACMEFIT_DB_NAME \
+      --secret  name=${ACMEFIT_POSTGRES_DB_USER} secret=${ACMEFIT_POSTGRES_DB_PASSWORD}\
+      --client-type springboot
 }
 
 function create_payment_service() {
