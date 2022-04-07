@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: "acme-payment"
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+userServiceUrl: http://localhost/user

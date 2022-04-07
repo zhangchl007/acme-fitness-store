@@ -12,6 +12,14 @@ public class PaymentResponse {
         return success;
     }
 
+    public PaymentResponse(String success, String message, String amount, String transactionID, String status) {
+        this.success = success;
+        this.message = message;
+        this.amount = amount;
+        this.transactionID = transactionID;
+        this.status = status;
+    }
+
     public void setSuccess(String success) {
         this.success = success;
     }

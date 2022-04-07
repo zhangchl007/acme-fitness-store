@@ -14,6 +14,10 @@ public class PaymentRequest {
         this.card = card;
     }
 
+    public Boolean cardIsNull(){
+        return this.card == null;
+    }
+
     public String getTotal() {
         return total;
     }
@@ -21,4 +25,9 @@ public class PaymentRequest {
     public void setTotal(String total) {
         this.total = total;
     }
+
+    public Boolean totalIsNullOrEmpty(){
+        return this.total == null || this.total.isEmpty();
+    }
+
 }
