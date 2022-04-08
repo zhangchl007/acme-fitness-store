@@ -104,21 +104,13 @@ if environ.get('CART_PORT') is not None:
 else:
     cartport=5000
 
-if environ.get('USER_HOST') is not None:
-    if os.environ['USER_HOST'] != "":
-        userhost=os.environ['USER_HOST']
+if environ.get('AUTH_URL') is not None:
+    if os.environ['AUTH_URL'] != "":
+        auth_url = os.environ['AUTH_URL']
     else:
-        userhost='localhost'
+        auth_url = ""
 else:
-    userhost='localhost'
-
-if environ.get('USER_PORT') is not None:
-    if os.environ['USER_PORT'] != "":
-        userport=int(os.environ['USER_PORT'])
-    else:
-        userport=8081
-else:
-    userport=8081
+    auth_url = ""
 
 if environ.get('AUTH_MODE') is not None:
     if os.environ['AUTH_MODE'] != "":
@@ -179,8 +171,8 @@ def verify_token(token):
     global authmode
 
     headers={'content-type':'application/json'}
-    verify_token_url="http://"+userhost+":"+str(userport)+"/verify-token"
-    login_url="http://"+userhost+":"+str(userport)+"/login"
+    verify_token_url= auth_url + "/verify-token"
+    login_url= auth_url + "/login"
 
     app.logger.info("user service mode in verify_token is %s", authmode)
     if authmode == 2:
@@ -211,10 +203,10 @@ def verify_token(token):
             verify_token_payload=json.dumps({"access_token": token})
             r=requests.post(verify_token_url, headers=headers, data=verify_token_payload)
             if r.status_code == 200:
-                app.logger.info('Authorized %s', json.loads(r.content)["message"])
+                app.logger.info('Authorized %s', str(r.content))
                 return True
             else:
-                app.logger.info('Un-authorized %s', json.loads(r.content)["message"])
+                app.logger.info('Un-authorized %s', str(r.content))
                 return False
 
     else:
