@@ -1,10 +1,9 @@
-package com.vmware.acmecatalog.repository;
-
-import com.vmware.acmecatalog.model.Product;
+package com.vmware.acme.catalog;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AcmeCatalogRepository extends CrudRepository<Product, String> {
+
 }

@@ -1,4 +1,4 @@
-package com.vmware.acmecatalog.model;
+package com.vmware.acme.catalog;
 
 
 import javax.persistence.Column;
@@ -7,7 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.vmware.acmecatalog.Request.ProductRequest;
 import org.hibernate.annotations.GenericGenerator;
 
 
@@ -30,23 +29,23 @@ public class Product {
     private Double price;
     private String tags;
 
-    public static Product fromProductRequestToProduct(ProductRequest productRequest) {
+    public static Product fromProductRequestToProduct(ProductResponse productResponse) {
 
         Product product = new Product();
-        product.setPrice(productRequest.getPrice());
-        product.setDescription(productRequest.getDescription());
-        product.setName(productRequest.getName());
-        product.setImageUrl1(productRequest.getImageUrl1());
-        product.setImageUrl2(productRequest.getImageUrl2());
-        product.setImageUrl3(productRequest.getImageUrl3());
-        product.setShortDescription(productRequest.getShortDescription());
+        product.setPrice(productResponse.getPrice());
+        product.setDescription(productResponse.getDescription());
+        product.setName(productResponse.getName());
+        product.setImageUrl1(productResponse.getImageUrl1());
+        product.setImageUrl2(productResponse.getImageUrl2());
+        product.setImageUrl3(productResponse.getImageUrl3());
+        product.setShortDescription(productResponse.getShortDescription());
 
         var tags = "";
 
-        if (productRequest.getTags() != null && !productRequest.getTags().isEmpty()) {
-            for (int i = 0; i < productRequest.getTags().size(); i++) {
-                tags = tags + productRequest.getTags().get(i);
-                if (i < productRequest.getTags().size() - 1) {
+        if (productResponse.getTags() != null && !productResponse.getTags().isEmpty()) {
+            for (int i = 0; i < productResponse.getTags().size(); i++) {
+                tags = tags + productResponse.getTags().get(i);
+                if (i < productResponse.getTags().size() - 1) {
                     tags = tags + ",";
                 }
             }

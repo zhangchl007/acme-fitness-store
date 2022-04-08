@@ -1,12 +1,12 @@
-package com.vmware.acmecatalog.Request;
-
-import com.vmware.acmecatalog.model.Product;
+package com.vmware.acme.catalog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ProductRequest {
+import org.springframework.util.StringUtils;
+
+public class ProductResponse {
 
     private String id;
     private String imageUrl1;
@@ -18,23 +18,19 @@ public class ProductRequest {
     private Double price;
     private List<String> tags = new ArrayList<>();
 
-    public static ProductRequest fromProductToProductRequest(Product product) {
+    public ProductResponse(Product product) {
+        id = product.getId();
+        price = product.getPrice();
+        description = product.getDescription();
+        name = product.getName();
+        imageUrl1 = product.getImageUrl1();
+        imageUrl2 = product.getImageUrl2();
+        imageUrl3 = product.getImageUrl3();
+        shortDescription = product.getShortDescription();
 
-        ProductRequest productRequest = new ProductRequest();
-        productRequest.setId(product.getId());
-        productRequest.setPrice(product.getPrice());
-        productRequest.setDescription(product.getDescription());
-        productRequest.setName(product.getName());
-        productRequest.setImageUrl1(product.getImageUrl1());
-        productRequest.setImageUrl2(product.getImageUrl2());
-        productRequest.setImageUrl3(product.getImageUrl3());
-        productRequest.setShortDescription(product.getShortDescription());
-
-        if (product.getTags() != null && !product.getTags().equals("")) {
-            var tags = product.getTags().split(",");
-            productRequest.setTags(Arrays.asList(tags));
+        if (StringUtils.hasText(product.getTags())) {
+            tags = Arrays.asList(StringUtils.split(product.getTags(), ","));
         }
-        return productRequest;
     }
 
     public String getId() {
