@@ -48,16 +48,16 @@ function create_dependencies() {
     --name $ACMEFIT_DB_NAME
 
   az postgres server create --name $ACMEFIT_POSTGRES_SERVER \
-      --resource-group $RESOURCE_GROUP \
-      --location "South Central US" \
-      --admin-user $ACMEFIT_POSTGRES_DB_USER \
-      --admin-password $ACMEFIT_POSTGRES_DB_PASSWORD \
-      --sku-name GP_Gen5_2 \
-      --version 11
+    --resource-group $RESOURCE_GROUP \
+    --location "South Central US" \
+    --admin-user $ACMEFIT_POSTGRES_DB_USER \
+    --admin-password $ACMEFIT_POSTGRES_DB_PASSWORD \
+    --sku-name GP_Gen5_2 \
+    --version 11
 
   az postgres db create \
-      --name $ACMEFIT_DB_NAME \
-      --server-name $ACMEFIT_POSTGRES_SERVER
+    --name $ACMEFIT_DB_NAME \
+    --server-name $ACMEFIT_POSTGRES_SERVER
 }
 
 function create_builder() {
@@ -82,6 +82,11 @@ function configure_gateway() {
     --issuer-uri ${ISSUER_URI}
 }
 
+function configure_acs() {
+  echo "Configuring Application Configuration Service to use repo: https://github.com/spring-cloud-services-samples/acme_fitness_demo"
+  az spring-cloud application-configuration-service git repo add --name animal-rescue-config --label Azure --patterns "default,catalog,identity,payment" --uri "https://github.com/spring-cloud-services-samples/acme_fitness_demo" --search-paths config
+}
+
 function create_cart_service() {
   echo "Creating cart-service app"
   az spring-cloud app create --name $CART_SERVICE
@@ -102,6 +107,7 @@ function create_cart_service() {
 function create_identity_service() {
   echo "Creating identity service"
   az spring-cloud app create --name $IDENTITY_SERVICE
+  az spring-cloud application-configuration-service bind --app $IDENTITY_SERVICE
   az spring-cloud gateway route-config create --name $IDENTITY_SERVICE --app-name $IDENTITY_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/identity-service.json"
 }
 
@@ -126,23 +132,25 @@ function create_order_service() {
 function create_catalog_service() {
   echo "Creating catalog service"
   az spring-cloud app create --name $CATALOG_SERVICE
+  az spring-cloud application-configuration-service bind --app $CATALOG_SERVICE
   az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
 
   az spring-cloud connection create postgres \
-      --resource-group $RESOURCE_GROUP \
-      --service $SPRING_CLOUD_INSTANCE \
-      --app $CATALOG_SERVICE \
-      --deployment default \
-      --tg $RESOURCE_GROUP \
-      --server $ACMEFIT_POSTGRES_SERVER \
-      --database $ACMEFIT_DB_NAME \
-      --secret  name=${ACMEFIT_POSTGRES_DB_USER} secret=${ACMEFIT_POSTGRES_DB_PASSWORD}\
-      --client-type springboot
+    --resource-group $RESOURCE_GROUP \
+    --service $SPRING_CLOUD_INSTANCE \
+    --app $CATALOG_SERVICE \
+    --deployment default \
+    --tg $RESOURCE_GROUP \
+    --server $ACMEFIT_POSTGRES_SERVER \
+    --database $ACMEFIT_DB_NAME \
+    --secret name=${ACMEFIT_POSTGRES_DB_USER} secret=${ACMEFIT_POSTGRES_DB_PASSWORD} \
+    --client-type springboot
 }
 
 function create_payment_service() {
   echo "Creating payment service"
   az spring-cloud app create --name $PAYMENT_SERVICE
+  az spring-cloud application-configuration-service bind --app $PAYMENT_SERVICE
   az spring-cloud gateway route-config create --name $PAYMENT_SERVICE --app-name $PAYMENT_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/payment-service.json"
 }
 
@@ -158,7 +166,7 @@ function deploy_cart_service() {
   local gateway_url=$(az spring-cloud gateway show | jq -r '.properties.url')
   az spring-cloud app deploy --name $CART_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=$redis_conn_str" "AUTH_URL=https://${gateway_url}"\
+    --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=$redis_conn_str" "AUTH_URL=https://${gateway_url}" \
     --source-path "$APPS_ROOT/acme-cart"
 }
 
@@ -166,6 +174,7 @@ function deploy_identity_service() {
   echo "Deploying identity-service application"
   az spring-cloud app deploy --name $IDENTITY_SERVICE \
     --env "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=${JWK_SET_URI}" \
+    --config-file-pattern identity \
     --source-path "$APPS_ROOT/acme-identity" #TODO: is this URI necessary?
 }
 
@@ -184,6 +193,7 @@ function deploy_catalog_service() {
   echo "Deploying catalog-service application"
 
   az spring-cloud app deploy --name $CATALOG_SERVICE \
+    --config-file-pattern catalog \
     --source-path "$APPS_ROOT/acme-catalog"
 }
 
@@ -191,6 +201,7 @@ function deploy_payment_service() {
   echo "Deploying payment-service application"
 
   az spring-cloud app deploy --name $PAYMENT_SERVICE \
+    --config-file-pattern payment \
     --source-path "$APPS_ROOT/acme-payment"
 }
 
@@ -207,6 +218,7 @@ function main() {
   configure_defaults
   create_dependencies
   create_builder
+  configure_acs
   configure_gateway
   create_identity_service
   create_cart_service
