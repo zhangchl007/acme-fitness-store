@@ -1,4 +1,4 @@
-insert into acmefit.public.catalog (id,
+insert into catalog (id,
                                     description,
                                     image_url1,
                                     image_url2,
