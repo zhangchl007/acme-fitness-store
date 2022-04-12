@@ -10,6 +10,7 @@ using acme_order.Db;
 using acme_order.Models;
 using acme_order.Request;
 using acme_order.Response;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace acme_order.Services
@@ -17,15 +18,18 @@ namespace acme_order.Services
     public class OrderService
     {
         private readonly OrderContext _context;
+        private readonly ILogger _logger;
         private static IAcmeServiceSettings _acmeServiceSettings;
+        private const string PendingTransactionId = "pending";
 
-        public OrderService(OrderContext context, IAcmeServiceSettings acmeServiceSettings)
+        public OrderService(OrderContext context, IAcmeServiceSettings acmeServiceSettings, ILogger<OrderService> logger)
         {
             _context = context;
             _acmeServiceSettings = acmeServiceSettings;
+            _logger = logger;
         }
         
-        public OrderCreateResponse Create(string userid, Order orderIn, string authorization)
+        public async Task<OrderCreateResponse> Create(string userid, Order orderIn, string authorization)
         {
             var order = new Order
             {
@@ -41,26 +45,21 @@ namespace acme_order.Services
                 Cart = orderIn.Cart
             };
 
-            _context.Orders.Add(order);
-
-            const string transactionId = "pending";
-
-            var paymentResult = MakePayment(orderIn.Total, order.Card, authorization);
-            var payment = paymentResult.Result;
-
-            var response = new OrderCreateResponse();
+            var payment = await MakePayment(orderIn.Total, order.Card, authorization);
+            _logger.LogDebug("Received payment response transactionId {transactionId}", payment.TransactionId);
             
-            var orderFound = _context.Orders.Single(o => o.Id == orderIn.Id);
-            
-            if (string.Equals(transactionId, payment.TransactionId)) return response;
-            
-            orderFound.Paid = payment.TransactionId;
-            Update(orderFound);
-            response.UserId = userid;
-            response.OrderId = orderFound.Id.ToString();
-            response.Payment = payment;
+            if (string.Equals(PendingTransactionId, payment.TransactionId)) return new OrderCreateResponse();
 
-            return response;
+            order.Paid = payment.TransactionId;
+            
+            var savedOrder = SaveOrder(order);
+
+            return new OrderCreateResponse
+            {
+                UserId = userid,
+                OrderId = savedOrder.Id.ToString(),
+                Payment = payment
+            };
         }
 
         public List<OrderResponse> Get() => 
@@ -69,10 +68,16 @@ namespace acme_order.Services
         public List<OrderResponse> Get(string userId) => 
             FromOrderToOrderResponse(_context.Orders.Where(o => o.UserId == userId).ToList());
 
-        private void Update(Order orderIn) => 
-            _context.Orders.Update(orderIn);
+        private Order SaveOrder(Order order)
+        {
+            _logger.LogDebug("Attempting to Save Order {order}", order);
+            var saved = _context.Orders.Add(order).Entity;
+            _context.SaveChanges();
+            _logger.LogDebug("Saved Order {saved}", saved);
+            return saved;
+        }
 
-        private static async Task<Payment> MakePayment(string total, Card card, string authorization)
+        private async Task<Payment> MakePayment(string total, Card card, string authorization)
         {
             var paymentRequest = new PaymentRequest()
                 {
@@ -91,6 +96,8 @@ namespace acme_order.Services
             var json = JsonConvert.SerializeObject(paymentRequest);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
             var url = $"{_acmeServiceSettings.PaymentServiceUrl}/pay";
+            
+            _logger.LogDebug("Making Payment Request for {total} to {url}", total, url);
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Content = data;
             request.Headers.Authorization = AuthenticationHeaderValue.Parse(authorization);

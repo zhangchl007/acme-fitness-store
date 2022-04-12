@@ -146,7 +146,6 @@ function create_payment_service() {
   echo "Creating payment service"
   az spring-cloud app create --name $PAYMENT_SERVICE
   az spring-cloud application-configuration-service bind --app $PAYMENT_SERVICE
-  az spring-cloud gateway route-config create --name $PAYMENT_SERVICE --app-name $PAYMENT_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/payment-service.json"
 }
 
 function create_frontend_app() {

@@ -2,6 +2,7 @@ using acme_order.Models;
 using acme_order.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using acme_order.Auth;
 using acme_order.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -23,10 +24,10 @@ namespace acme_order.Controllers
 
         [HttpPost("add/{userid}")]
         [ServiceFilter(typeof(AuthorizeResource))]
-        public ActionResult<OrderCreateResponse> Create(string userid, Order orderIn)
+        public async Task<ActionResult<OrderCreateResponse>> Create(string userid, Order orderIn)
         {
             var authorization = HttpContext.Request.Headers[HeaderNames.Authorization].ToString();
-            return _orderService.Create(userid, orderIn, authorization);
+            return await _orderService.Create(userid, orderIn, authorization);
         }
 
         [HttpGet("all")]

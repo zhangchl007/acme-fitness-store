@@ -14,5 +14,21 @@
     "tags": [
       "order"
     ]
+  },
+  {
+    "ssoEnabled": true,
+    "tokenRelay": true,
+    "title": "Retrieve User's Orders.",
+    "description": "Lookup all orders for the given user",
+    "predicates": [
+      "Path=/order/{userId}",
+      "Method=GET"
+    ],
+    "filters": [
+      "StripPrefix=0"
+    ],
+    "tags": [
+      "order"
+    ]
   }
 ]
