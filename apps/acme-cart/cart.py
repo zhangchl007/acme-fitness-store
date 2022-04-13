@@ -121,7 +121,7 @@ def set_cloud_role(envelope):
 if instrumentationKey != "":
     middleware = FlaskMiddleware(
         app,
-        exporter=AzureExporter(connection_string="InstrumentationKey=" + instrumentationKey),
+        exporter=AzureExporter(connection_string=instrumentationKey),
         sampler=ProbabilitySampler(rate=1.0),
     )
     middleware.exporter.add_telemetry_processor(set_cloud_role)
