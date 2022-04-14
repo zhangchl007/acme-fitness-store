@@ -178,10 +178,11 @@ function deploy_order_service() {
   echo "Deploying user-service application"
   local gateway_url=$(az spring-cloud gateway show | jq -r '.properties.url')
   local postgres_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $ORDER_SERVICE_POSTGRES_CONNECTION --app $ORDER_SERVICE | jq '.configurations[0].value' -r)
+  local app_insights_key=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties.connection_string')
 
   az spring-cloud app deploy --name $ORDER_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "ConnectionStrings__OrderContext=$postgres_connection_url" "AcmeServiceSettings__AuthUrl=https://${gateway_url}" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" \
+    --env "ConnectionStrings__OrderContext=$postgres_connection_url" "AcmeServiceSettings__AuthUrl=https://${gateway_url}" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" "ApplicationInsights__ConnectionString=$app_insights_key" \
     --source-path "$APPS_ROOT/acme-order"
 }
 
