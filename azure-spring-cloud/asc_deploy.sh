@@ -204,10 +204,12 @@ function deploy_payment_service() {
 
 function deploy_frontend_app() {
   echo "Deploying frontend application"
+  local app_insights_key=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties.connection_string')
 
   rm -rf "$APPS_ROOT/acme-shopping/node_modules"
   az spring-cloud app deploy --name $FRONTEND_APP \
     --builder $CUSTOM_BUILDER \
+    --env "APPLICATIONINSIGHTS_CONNECTION_STRING=$app_insights_key" \
     --source-path "$APPS_ROOT/acme-shopping"
 }
 
