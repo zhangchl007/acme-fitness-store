@@ -128,6 +128,7 @@ function create_catalog_service() {
   echo "Creating catalog service"
   az spring-cloud app create --name $CATALOG_SERVICE
   az spring-cloud application-configuration-service bind --app $CATALOG_SERVICE
+  az spring-cloud service-registry bind --app $CATALOG_SERVICE
   az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
 
   az spring-cloud connection create postgres \
@@ -146,6 +147,7 @@ function create_payment_service() {
   echo "Creating payment service"
   az spring-cloud app create --name $PAYMENT_SERVICE
   az spring-cloud application-configuration-service bind --app $PAYMENT_SERVICE
+  az spring-cloud service-registry bind --app $PAYMENT_SERVICE
 }
 
 function create_frontend_app() {
@@ -182,7 +184,7 @@ function deploy_order_service() {
 
   az spring-cloud app deploy --name $ORDER_SERVICE \
     --builder $CUSTOM_BUILDER \
-    --env "ConnectionStrings__OrderContext=$postgres_connection_url" "AcmeServiceSettings__AuthUrl=https://${gateway_url}" "AcmeServiceSettings__PaymentServiceUrl=http://payment-service.default.svc.cluster.local" "ApplicationInsights__ConnectionString=$app_insights_key" \
+    --env "ConnectionStrings__OrderContext=$postgres_connection_url" "AcmeServiceSettings__AuthUrl=https://${gateway_url}" "ApplicationInsights__ConnectionString=$app_insights_key" \
     --source-path "$APPS_ROOT/acme-order"
 }
 
