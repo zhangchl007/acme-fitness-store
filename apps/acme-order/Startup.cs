@@ -4,6 +4,7 @@ using acme_order.Configuration;
 using acme_order.Db;
 using acme_order.Models;
 using acme_order.Services;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,9 @@ namespace acme_order
             services.AddSingleton<OrderService>();
             services.AddControllers();
             services.AddScoped<AuthorizeResource>();
+            
+            services.AddApplicationInsightsTelemetry();
+            services.AddSingleton<ITelemetryInitializer, CloudRoleNameTelemetryInitializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
