@@ -36,13 +36,12 @@ function create_dependencies() {
 
   echo "Creating Azure Database for Postgres $ACMEFIT_POSTGRES_SERVER"
 
-  az postgres server create --name $ACMEFIT_POSTGRES_SERVER \
+  az postgres flexible-server create --name $ACMEFIT_POSTGRES_SERVER \
     --resource-group $RESOURCE_GROUP \
     --location "South Central US" \
     --admin-user $ACMEFIT_POSTGRES_DB_USER \
     --admin-password $ACMEFIT_POSTGRES_DB_PASSWORD \
-    --sku-name GP_Gen5_2 \
-    --version 11
+    --yes
 
   echo "Creating Postgres Database $ACMEFIT_CATALOG_DB_NAME"
   az postgres db create \
@@ -56,8 +55,8 @@ function create_dependencies() {
 }
 
 function create_builder() {
-  echo "Creating a custom builder with name $CUSTOM_BUILDER and configuration $PROJECT_ROOT/azure-spring-cloud/builder.json"
-  az spring-cloud build-service builder create -n $CUSTOM_BUILDER --builder-file "$PROJECT_ROOT/azure-spring-cloud/builder.json"
+  echo "Creating a custom builder with name $CUSTOM_BUILDER and configuration $PROJECT_ROOT/azure/builder.json"
+  az spring-cloud build-service builder create -n $CUSTOM_BUILDER --builder-file "$PROJECT_ROOT/azure/builder.json"
 }
 
 function configure_gateway() {
@@ -85,7 +84,7 @@ function configure_acs() {
 function create_cart_service() {
   echo "Creating cart-service app"
   az spring-cloud app create --name $CART_SERVICE
-  az spring-cloud gateway route-config create --name $CART_SERVICE --app-name $CART_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/cart-service.json"
+  az spring-cloud gateway route-config create --name $CART_SERVICE --app-name $CART_SERVICE --routes-file "$PROJECT_ROOT/azure/routes/cart-service.json"
 
   az spring-cloud connection create redis \
     --service $SPRING_CLOUD_INSTANCE \
@@ -103,13 +102,13 @@ function create_identity_service() {
   echo "Creating identity service"
   az spring-cloud app create --name $IDENTITY_SERVICE
   az spring-cloud application-configuration-service bind --app $IDENTITY_SERVICE
-  az spring-cloud gateway route-config create --name $IDENTITY_SERVICE --app-name $IDENTITY_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/identity-service.json"
+  az spring-cloud gateway route-config create --name $IDENTITY_SERVICE --app-name $IDENTITY_SERVICE --routes-file "$PROJECT_ROOT/azure/routes/identity-service.json"
 }
 
 function create_order_service() {
   echo "Creating order service"
   az spring-cloud app create --name $ORDER_SERVICE
-  az spring-cloud gateway route-config create --name $ORDER_SERVICE --app-name $ORDER_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/order-service.json"
+  az spring-cloud gateway route-config create --name $ORDER_SERVICE --app-name $ORDER_SERVICE --routes-file "$PROJECT_ROOT/azure/routes/order-service.json"
 
   az spring-cloud connection create postgres \
     --resource-group $RESOURCE_GROUP \
@@ -129,7 +128,7 @@ function create_catalog_service() {
   az spring-cloud app create --name $CATALOG_SERVICE
   az spring-cloud application-configuration-service bind --app $CATALOG_SERVICE
   az spring-cloud service-registry bind --app $CATALOG_SERVICE
-  az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/catalog-service.json"
+  az spring-cloud gateway route-config create --name $CATALOG_SERVICE --app-name $CATALOG_SERVICE --routes-file "$PROJECT_ROOT/azure/routes/catalog-service.json"
 
   az spring-cloud connection create postgres \
     --resource-group $RESOURCE_GROUP \
@@ -153,12 +152,16 @@ function create_payment_service() {
 function create_frontend_app() {
   echo "Creating frontend"
   az spring-cloud app create --name $FRONTEND_APP
-  az spring-cloud gateway route-config create --name $FRONTEND_APP --app-name $FRONTEND_APP --routes-file "$PROJECT_ROOT/azure-spring-cloud/routes/frontend.json"
+  az spring-cloud gateway route-config create --name $FRONTEND_APP --app-name $FRONTEND_APP --routes-file "$PROJECT_ROOT/azure/routes/frontend.json"
 }
 
 function deploy_cart_service() {
   echo "Deploying cart-service application"
-  local redis_conn_str=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --app $CART_SERVICE --connection $CART_SERVICE_REDIS_CONNECTION | jq -r '.configurations[0].value')
+  local redis_conn_str=$(az spring-cloud connection show -g $RESOURCE_GROUP \
+    --service $SPRING_CLOUD_INSTANCE \
+    --deployment default \
+    --app $CART_SERVICE \
+    --connection $CART_SERVICE_REDIS_CONNECTION | jq -r '.configurations[0].value')
   local gateway_url=$(az spring-cloud gateway show | jq -r '.properties.url')
   local app_insights_key=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties.connection_string')
 
@@ -173,13 +176,17 @@ function deploy_identity_service() {
   az spring-cloud app deploy --name $IDENTITY_SERVICE \
     --env "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=${JWK_SET_URI}" \
     --config-file-pattern identity \
-    --source-path "$APPS_ROOT/acme-identity" #TODO: is this URI necessary?
+    --source-path "$APPS_ROOT/acme-identity"
 }
 
 function deploy_order_service() {
   echo "Deploying user-service application"
   local gateway_url=$(az spring-cloud gateway show | jq -r '.properties.url')
-  local postgres_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP --service $SPRING_CLOUD_INSTANCE --deployment default --connection $ORDER_SERVICE_POSTGRES_CONNECTION --app $ORDER_SERVICE | jq '.configurations[0].value' -r)
+  local postgres_connection_url=$(az spring-cloud connection show -g $RESOURCE_GROUP \
+    --service $SPRING_CLOUD_INSTANCE \
+    --deployment default \
+    --connection $ORDER_SERVICE_POSTGRES_CONNECTION \
+    --app $ORDER_SERVICE | jq '.configurations[0].value' -r)
   local app_insights_key=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties.connection_string')
 
   az spring-cloud app deploy --name $ORDER_SERVICE \
