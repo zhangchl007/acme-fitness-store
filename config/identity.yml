@@ -30,7 +30,8 @@ eureka:
 spring:
   config:
     activate:
-      on-profile: key-vault
+      on-profile:
+      - key-vault
   cloud:
     azure:
       keyvault:
