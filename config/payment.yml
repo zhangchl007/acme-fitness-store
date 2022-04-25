@@ -5,3 +5,15 @@ spring:
     activate:
       on-profile:
         - default
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+eureka:
+  client:
+    enabled: true

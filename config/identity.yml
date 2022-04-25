@@ -14,6 +14,18 @@ spring:
         jwt:
           jwk-set-uri: ${JWK_URI}
 
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+eureka:
+  client:
+    enabled: true
+
 ---
 spring:
   config:
