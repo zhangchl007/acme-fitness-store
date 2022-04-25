@@ -5,7 +5,9 @@ spring:
     static-path-pattern: /static/images/**
   config:
     activate:
-      on-profile: default
+      on-profile:
+      - default
+      - azure
 
 management:
   endpoint:
