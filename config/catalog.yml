@@ -23,8 +23,7 @@ eureka:
 spring:
   config:
     activate:
-      on-profile:
-      - key-vault
+      on-profile: key-vault
   datasource:
     url: jdbc:postgresql://${POSTGRES-SERVER-NAME}:5432/${CATALOG-DATABASE-NAME}?sslmode=require
     username: ${POSTGRES-LOGIN-NAME}
@@ -37,5 +36,4 @@ spring:
           property-source-enabled: true
           property-sources:
           - endpoint: ${KEYVAULT_URI}
-            name:
-            - 'acme-store-vault'
+            name: 'acme-store-vault'

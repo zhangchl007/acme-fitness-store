@@ -30,8 +30,7 @@ eureka:
 spring:
   config:
     activate:
-      on-profile:
-      - key-vault
+      on-profile: key-vault
   cloud:
     azure:
       keyvault:
@@ -40,7 +39,6 @@ spring:
           property-source-enabled: true
           property-sources:
             - endpoint: ${KEYVAULT_URI}
-              name:
-              - 'acme-store-vault'
+              name: 'acme-store-vault'
 
 JWK_URI: ${SSO-PROVIDER-JWK-URI}
