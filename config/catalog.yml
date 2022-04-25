@@ -37,4 +37,5 @@ spring:
           property-source-enabled: true
           property-sources:
           - endpoint: ${KEYVAULT_URI}
-            name: 'acme-store-vault'
+            name:
+            - 'acme-store-vault'
