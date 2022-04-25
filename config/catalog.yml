@@ -26,7 +26,7 @@ spring:
     activate:
       on-profile: key-vault
   datasource:
-    url: jdbc:postgresql://${POSTGRES-SERVER-NAME}:5432/${CATALOG-DATABASE-NAME}?sslmode=require
+    url: "jdbc:postgresql://${POSTGRES-SERVER-NAME}:5432/${CATALOG-DATABASE-NAME}?sslmode=require"
     username: ${POSTGRES-LOGIN-NAME}
     password: ${POSTGRES-LOGIN-PASSWORD}
   cloud:
