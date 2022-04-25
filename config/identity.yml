@@ -6,8 +6,7 @@ spring:
     name: 'acme-identity'
   config:
     activate:
-      on-profile:
-        - default
+      on-profile: default
   security:
     oauth2:
       resourceserver:
@@ -37,6 +36,6 @@ spring:
         secret:
           enabled: true
           property-source-enabled: true
-          property-sources: { endpoint: ${KEYVAULT_URI} name: 'acme-store-vault' }
+          property-sources: { endpoint: ${KEYVAULT_URI}, name: 'acme-store-vault' }
 
 JWK_URI: ${SSO-PROVIDER-JWK-URI}
