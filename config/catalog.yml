@@ -7,7 +7,6 @@ spring:
     activate:
       on-profile:
       - default
-      - azure
 
 management:
   endpoint:
