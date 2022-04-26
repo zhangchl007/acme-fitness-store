@@ -1,3 +1,7 @@
+locals {
+  azure-metadeta = "azure.extensions"
+}
+
 # Postgresql Flexible Server
 resource "azurerm_postgresql_flexible_server" "postgresql_server" {
   name                   = "${var.project_name}-db-server"
@@ -5,7 +9,7 @@ resource "azurerm_postgresql_flexible_server" "postgresql_server" {
   location               = azurerm_resource_group.grp.location
   version                = "13"
   administrator_login    = var.dbadmin
-  administrator_password = random_password.password.result
+  administrator_password = var.dbpassword
   sku_name               = "GP_Standard_D4s_v3"
   storage_mb             = 32768
   zone                   = "1"
