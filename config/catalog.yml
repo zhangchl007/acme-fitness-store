@@ -5,8 +5,7 @@ spring:
     static-path-pattern: /static/images/**
   config:
     activate:
-      on-profile:
-      - default
+      on-profile: default
 
 management:
   endpoint:
@@ -34,4 +33,3 @@ spring:
         secret:
           enabled: true
           property-source-enabled: true
-          property-sources: { endpoint: ${KEYVAULT_URI}, name: 'acme-store-vault' }
