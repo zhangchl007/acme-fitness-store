@@ -679,12 +679,6 @@ az spring-cloud gateway route-config create \
     --routes-file azure/routes/identity-service.json
 ```
 
-Bind to Service Registry:
-
-```shell
-az spring-cloud service-registry bind --app ${IDENTITY_SERVICE_APP}
-```
-
 Deploy the Identity Service:
 
 ```shell
@@ -832,7 +826,7 @@ az spring-cloud app identity assign --name ${CATALOG_SERVICE_APP}
 export CATALOG_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${CATALOG_SERVICE_APP} | jq -r '.identity.principalId')
 
 az spring-cloud app identity assign --name ${IDENTITY_SERVICE_APP}
-export IDENTITY_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${CATALOG_SERVICE_APP} | jq -r '.identity.principalId')
+export IDENTITY_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${IDENTITY_SERVICE_APP} | jq -r '.identity.principalId')
 
 az spring-cloud app identity assign --name ${FRONTEND_APP}
 export FRONTEND_APP_IDENTITY=$(az spring-cloud app show --name ${FRONTEND_APP} | jq -r '.identity.principalId')
@@ -891,11 +885,11 @@ az spring-cloud app update --name ${ORDER_SERVICE_APP} \
 
 az spring-cloud app update --name ${CATALOG_SERVICE_APP} \
     --config-file-pattern catalog/default,catalog/key-vault \
-    --env "KEYVAULT_URI=${KEYVAULT_URI}"
+    --env "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_ENDPOINT=${KEYVAULT_URI}" "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_NAME='animal-rescue-vault'" "SPRING_PROFILES_ACTIVE=default,key-vault"
     
 az spring-cloud app update --name ${IDENTITY_SERVICE_APP} \
     --config-file-pattern identity/default,identity/key-vault \
-    --env "KEYVAULT_URI=${KEYVAULT_URI}"
+    --env "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_ENDPOINT=${KEYVAULT_URI}" "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_NAME='animal-rescue-vault'" "SPRING_PROFILES_ACTIVE=default,key-vault"
     
 az spring-cloud app update --name ${CART_SERVICE_APP} \
     --env "CART_PORT=8080" "KEYVAULT_URI=${KEYVAULT_URI}" "AUTH_URL=https://${GATEWAY_URL}"
