@@ -905,10 +905,22 @@ az spring-cloud app update --name ${FRONTEND_APP} \
 Retrieve the Instrumentation Key for Application Insights and add to Key Vault
 
 ```shell
-export INSTRUMENTATION_KEY=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties.connection_string')
+export INSTRUMENTATION_KEY=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties."connection-string"')
 
 az keyvault secret set --vault-name ${KEY_VAULT} \
     --name "ApplicationInsights--ConnectionString" --value ${INSTRUMENTATION_KEY}
+```
+
+### Update Sampling Rate
+
+Increase the sampling rate for the Application Insights binding.
+
+```shell
+az spring-cloud build-service builder buildpack-binding set \
+    --builder-name default \
+    -n default \
+    --type ApplicationInsights \
+    --properties sampling-rate=100 connection-string=${INSTRUMENTATION_KEY}
 ```
 
 ### Reload Applications
@@ -916,7 +928,12 @@ az keyvault secret set --vault-name ${KEY_VAULT} \
 Reload applications to activate Application Insights.
 
 ```shell
-
+az spring-cloud app restart -n ${FRONTEND_APP}
+az spring-cloud app restart -n ${CART_SERVICE_APP}
+az spring-cloud app restart -n ${ORDER_SERVICE_APP}
+az spring-cloud app restart -n ${IDENTITY_SERVICE_APP}
+az spring-cloud app restart -n ${CATALOG_SERVICE_APP}
+az spring-cloud app restart -n ${PAYMENT_SERVICE_APP}
 ```
 
 ### Generate Traffic

@@ -195,7 +195,7 @@ public class GuestSimulation extends Simulation {
 	private Map<CharSequence, String> headers_149 = Map.ofEntries(
 			Map.entry("Accept", "*/*"),
 			Map.entry("Content-Type", "application/json; charset=utf-8"),
-			Map.entry("Origin", "https://paly-acme-gateway-30477.svc.azuremicroservices.io"),
+			Map.entry("Origin", GATEWAY_URL),
 			Map.entry("Sec-Fetch-Dest", "empty"),
 			Map.entry("Sec-Fetch-Mode", "cors"),
 			Map.entry("Sec-Fetch-Site", "same-origin"),
@@ -759,6 +759,6 @@ public class GuestSimulation extends Simulation {
 			);
 
 	{
-		setUp(scn.injectOpen(atOnceUsers(10))).protocols(httpProtocol);
+		setUp(scn.injectOpen(atOnceUsers(1000))).protocols(httpProtocol);
 	}
 }

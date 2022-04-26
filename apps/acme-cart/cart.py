@@ -112,7 +112,7 @@ if environ.get('KEYVAULT_URI') is not None:
             if secret.name == 'CART-REDIS-CONNECTION-STRING':
                 redisConnStr = client.get_secret('CART-REDIS-CONNECTION-STRING').value
             if secret.name == 'ApplicationInsights--ConnectionString':
-                instrumentationKey = client.get_secret('ApplicationInsights--ConnectionString')
+                instrumentationKey = client.get_secret('ApplicationInsights--ConnectionString').value
 
 
 # Uncomment below to turnon statsd
