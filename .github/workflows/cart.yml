@@ -1,4 +1,4 @@
-name: Cart
+name: Deploy Cart
 on:
   workflow_dispatch:
     inputs: { }

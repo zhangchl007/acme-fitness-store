@@ -1,4 +1,4 @@
-name: Catalog
+name: Deploy Catalog
 on:
   workflow_dispatch:
     inputs: { }
@@ -46,4 +46,4 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --service "$SPRING_CLOUD_SERVICE" \
             --config-file-pattern catalog/default \
-            --artifact-path ./build/libs/acme-catalog-0.0.1-SNAPSHOT.jar
+            --source-path ./

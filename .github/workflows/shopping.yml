@@ -1,4 +1,4 @@
-name: Shopping
+name: Deploy Shopping
 on:
   workflow_dispatch:
     inputs: { }

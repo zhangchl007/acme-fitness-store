@@ -1,4 +1,4 @@
-name: Order
+name: Deploy Order
 on:
   workflow_dispatch:
     inputs: { }

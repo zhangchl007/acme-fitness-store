@@ -1,4 +1,4 @@
-name: Payment
+name: Deploy Payment
 on:
   workflow_dispatch:
     inputs: { }
@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build
+          arguments: check
           build-root-directory: apps/acme-payment
       - name: Set up Azure
         uses: azure/login@v1
@@ -45,4 +45,4 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --service "$SPRING_CLOUD_SERVICE" \
             --config-file-pattern payment/default \
-            --artifact-path ./build/libs/acme-payment-0.0.1-SNAPSHOT.jar
+            --source-path ./
