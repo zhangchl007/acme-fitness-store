@@ -251,11 +251,11 @@
 
                 console.log('Successful call to order')
 
-                if(jqXHR.status == 200) {
+                if(jqXHR.status === 200) {
 
                   if (data !=null) {
 
-                    if (data.payment.status == 200) {
+                    if (data.payment.status === 200) {
                       sessionStorage.orderID = data.order_id
                       sessionStorage.transactionID = data.payment.transactionID
                       // Redirect to Transaction page

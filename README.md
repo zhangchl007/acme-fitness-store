@@ -670,6 +670,12 @@ Bind the identity service to Application Configuration Service
 az spring-cloud application-configuration-service bind --app ${IDENTITY_SERVICE_APP}
 ```
 
+Bind the identity service to Service Registry.
+
+```shell
+az spring-cloud service-registry bind --app ${IDENTITY_SERVICE_APP}
+```
+
 Create routing rules for the identity service application
 
 ```shell
