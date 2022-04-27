@@ -6,8 +6,9 @@ const app = express();
 
 if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
     console.log("APPLICATIONINSIGHTS_CONNECTION_STRING env variable detected, setting up Application Insights");
-    let appInsights = require("applicationinsights");
-    appInsights.setup().start();
+    appInsights.setup();
+    appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "frontend";
+    appInsights.start();
 } else {
     console.log("No APPLICATIONINSIGHTS_CONNECTION_STRING provided, skipping Application Insights connection");
 }
@@ -37,7 +38,9 @@ async function processSecrets() {
 
         if (appInsightsKey && appInsightsKey.value) {
             console.log("Found application insights secret, setting up Application Insights")
-            appInsights.setup(appInsightsKey.value).start();
+            appInsights.setup(appInsightsKey.value);
+            appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "frontend";
+            appInsights.start();
         }
     }
 }
