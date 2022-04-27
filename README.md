@@ -26,9 +26,6 @@ finished, you can continue to manage the application via the Azure CLI or switch
    * [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
    * [Unit 2 - Configure Single Sign On](#unit-2---configure-single-sign-on)
    * [Unit 3 - Securely Load Application Secrets](#unit-3---securely-load-application-secrets)
-   * [Unit 4 - Monitor Applications](#unit-4---monitor-applications)
-   * [Unit 5 - Set Request Rate Limits](#unit-5---set-request-rate-limits)
-   * [Unit 6 - Automate with GitHub Actions](#unit-6---automate-with-github-actions)
 
 ## What will you experience
 You will:
@@ -904,50 +901,18 @@ az spring-cloud app update --name ${FRONTEND_APP} \
     --env "KEYVAULT_URI=${KEYVAULT_URI}"
 ```
 
-## Unit 4 - Monitor Applications
+## Next Steps
 
-### Add Instrumentation Key to Key Vault
+In this quickstart, you've deployed polyglot microservices to Azure Spring Cloud using Azure CLI.
+You also configured VMware Tanzu components in the enterprise tier. To learn more about
+Azure Spring Cloud or VMware Tanzu components, go to:
 
-Retrieve the Instrumentation Key for Application Insights and add to Key Vault
-
-```shell
-export INSTRUMENTATION_KEY=$(az spring-cloud build-service builder buildpack-binding show -n default | jq -r '.properties.launchProperties.properties."connection-string"')
-
-az keyvault secret set --vault-name ${KEY_VAULT} \
-    --name "ApplicationInsights--ConnectionString" --value ${INSTRUMENTATION_KEY}
-```
-
-### Update Sampling Rate
-
-Increase the sampling rate for the Application Insights binding.
-
-```shell
-az spring-cloud build-service builder buildpack-binding set \
-    --builder-name default \
-    -n default \
-    --type ApplicationInsights \
-    --properties sampling-rate=100 connection-string=${INSTRUMENTATION_KEY}
-```
-
-### Reload Applications
-
-Reload applications to activate Application Insights.
-
-```shell
-az spring-cloud app restart -n ${FRONTEND_APP}
-az spring-cloud app restart -n ${CART_SERVICE_APP}
-az spring-cloud app restart -n ${ORDER_SERVICE_APP}
-az spring-cloud app restart -n ${IDENTITY_SERVICE_APP}
-az spring-cloud app restart -n ${CATALOG_SERVICE_APP}
-az spring-cloud app restart -n ${PAYMENT_SERVICE_APP}
-```
-
-### Generate Traffic
-
-### Start monitoring apps and dependencies - in Application Insights
-
-### Start monitoring ACME Fitness Store's logs and metrics in Azure Log Analytics
-
-## Unit 5 - Set Request Rate Limits
-
-## Unit 6 - Automate with GitHub Actions
+- [Azure Spring Cloud](https://azure.microsoft.com/en-us/services/spring-cloud/)
+- [Azure Spring Cloud docs](https://docs.microsoft.com/en-us/azure/spring-cloud/quickstart-provision-service-instance-enterprise?tabs=azure-portal)
+- [Deploy Spring microservices from scratch](https://github.com/microsoft/azure-spring-cloud-training)
+- [Deploy existing Spring microservices](https://github.com/Azure-Samples/azure-spring-cloud)
+- [Azure for Java Cloud Developers](https://docs.microsoft.com/en-us/azure/java/)
+- [Spring Cloud Azure](https://cloud.spring.io/spring-cloud-azure/)
+- [Spring Cloud](https://spring.io/projects/spring-cloud)
+- [Spring Cloud Gateway](https://docs.vmware.com/en/VMware-Spring-Cloud-Gateway-for-Kubernetes/index.html)
+- [API Portal](https://docs.vmware.com/en/API-portal-for-VMware-Tanzu/index.html)
