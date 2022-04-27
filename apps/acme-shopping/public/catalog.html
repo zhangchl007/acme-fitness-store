@@ -130,6 +130,7 @@
         url: "/products",
         type: "GET",
         success: function(data, textStatus, jqXHR) {
+          let dollarUSLocale = Intl.NumberFormat('en-US');
 
           if (data != null) {
 
@@ -145,7 +146,7 @@
                class="img-fluid image1"></a></div>\
                <div class="text">\
                <h3><a href="detail.html?id=' + product.id + '"' + ' </a>' + product.name+ '</h3>\
-               <p class="price">USD ' + product.price + '</p>\
+               <p class="price">USD ' + dollarUSLocale.format(product.price) + '</p>\
                </div>\
                <div class="ribbon new">\
                <div class="theribbon">NEW</div>\

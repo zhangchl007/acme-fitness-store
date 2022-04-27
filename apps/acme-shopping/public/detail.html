@@ -165,11 +165,11 @@
                 console.log('received product detail: ' + body)
                 // Set all the field dynamically
                 if(body != null) {
-
+                    let dollarUSLocale = Intl.NumberFormat('en-US');
                     $("#productName").html(body.data.name)
                     $("#productTitle").html(body.data.name)
                     $("#descriptionTitle").html(body.data.shortDescription)
-                    $("#productPrice").html(body.data.price)
+                    $("#productPrice").html(dollarUSLocale.format(body.data.price))
                     $("#detailedDescription").html(body.data.description)
                     var img = '<img src="' + body.data.imageUrl2 +'" alt="" class="img-fluid">'
                     $("#mainImage").html(img);
