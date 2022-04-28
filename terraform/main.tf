@@ -1,5 +1,46 @@
+# Configure the Microsoft Azure Provider
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
+
+  cloud {
+    organization = "acme-fitness-demo"
+    workspaces {
+      name = "development"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
+
 locals {
   azure-metadeta = "azure.extensions"
+}
+
+# Resource Group
+resource "azurerm_resource_group" "grp" {
+  name     = "${var.project_name}-resources"
+  location = var.resource_group_location
+}
+
+# Azure Cache for Redis Instance
+resource "azurerm_redis_cache" "redis" {
+  name                = "${var.project_name}-redis"
+  location            = azurerm_resource_group.grp.location
+  resource_group_name = azurerm_resource_group.grp.name
+  capacity            = 1
+  family              = "C"
+  sku_name            = "Basic"
 }
 
 # Postgresql Flexible Server
@@ -38,3 +79,13 @@ resource "azurerm_postgresql_flexible_server_database" "postgre_db" {
   charset   = "utf8"
   count     = length(var.postgres_db_name)
 }
+
+# Log Analiytics Workspace for App Insights
+resource "azurerm_log_analytics_workspace" "asc_workspace" {
+  name                = "${var.project_name}-workspace"
+  location            = azurerm_resource_group.grp.location
+  resource_group_name = azurerm_resource_group.grp.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
