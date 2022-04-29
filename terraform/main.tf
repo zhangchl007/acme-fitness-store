@@ -27,9 +27,15 @@ locals {
   azure-metadeta = "azure.extensions"
 }
 
+data "azurerm_client_config" "current" {}
+
 # Generate Admin User for Postgresql Server
-resource "random_string" "admin" {
+resource "random_password" "admin" {
   length           = 8
+  special          = true
+  override_special = "_"
+  number           = false
+  upper            = false
 }
 
 # Generate Password for Postgresql Server
@@ -61,7 +67,7 @@ resource "azurerm_postgresql_flexible_server" "postgresql_server" {
   resource_group_name    = azurerm_resource_group.grp.name
   location               = azurerm_resource_group.grp.location
   version                = "13"
-  administrator_login    = random_string.admin.result
+  administrator_login    = random_password.admin.result
   administrator_password = random_password.password.result
   sku_name               = "GP_Standard_D4s_v3"
   storage_mb             = 32768
@@ -99,4 +105,46 @@ resource "azurerm_log_analytics_workspace" "asc_workspace" {
   resource_group_name = azurerm_resource_group.grp.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
+}
+
+# Keyvault for Saving Secrets
+resource "azurerm_key_vault" "key_vault" {
+  name                       = "${var.project_name}-keyvault"
+  location                   = azurerm_resource_group.grp.location
+  resource_group_name        = azurerm_resource_group.grp.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  soft_delete_retention_days = 7
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "create",
+      "get",
+    ]
+
+    secret_permissions = [
+      "set",
+      "get",
+      "delete",
+      "purge",
+      "recover"
+    ]
+  }
+}
+
+# Create Secret for Admin Username
+resource "azurerm_key_vault_secret" "admin_username" {
+  name         = "admin-username"
+  value        = azurerm_postgresql_flexible_server.postgresql_server.administrator_login
+  key_vault_id = azurerm_key_vault.key_vault.id
+}
+
+# Create Secret for Admin Password
+resource "azurerm_key_vault_secret" "admin_password" {
+  name         = "admin-password"
+  value        = azurerm_postgresql_flexible_server.postgresql_server.administrator_password
+  key_vault_id = azurerm_key_vault.key_vault.id
 }
