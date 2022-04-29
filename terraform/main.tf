@@ -27,6 +27,18 @@ locals {
   azure-metadeta = "azure.extensions"
 }
 
+# Generate Admin User for Postgresql Server
+resource "random_string" "admin" {
+  length           = 8
+}
+
+# Generate Password for Postgresql Server
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 # Resource Group
 resource "azurerm_resource_group" "grp" {
   name     = "${var.project_name}-resources"
@@ -49,8 +61,8 @@ resource "azurerm_postgresql_flexible_server" "postgresql_server" {
   resource_group_name    = azurerm_resource_group.grp.name
   location               = azurerm_resource_group.grp.location
   version                = "13"
-  administrator_login    = var.dbadmin
-  administrator_password = var.dbpassword
+  administrator_login    = random_string.admin.result
+  administrator_password = random_password.password.result
   sku_name               = "GP_Standard_D4s_v3"
   storage_mb             = 32768
   zone                   = "1"
@@ -88,4 +100,3 @@ resource "azurerm_log_analytics_workspace" "asc_workspace" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
-
