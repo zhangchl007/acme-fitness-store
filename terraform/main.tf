@@ -121,11 +121,11 @@ resource "azurerm_key_vault" "key_vault" {
     object_id = data.azurerm_client_config.current.object_id
 
     secret_permissions = [
-      "set",
-      "get",
-      "delete",
-      "purge",
-      "recover"
+      "Set",
+      "Get",
+      "Delete",
+      "Purge",
+      "Recover"
     ]
   }
 }
