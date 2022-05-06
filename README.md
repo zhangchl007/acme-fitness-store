@@ -46,8 +46,23 @@ You will:
 
 The following diagram shows the architecture of the ACME Fitness Store that will be used for this guide:
 
-[//]: # (TODO: Add Image)
-[//]: # ( ![An image showing the microservics involved in the ACME Fitness Store. It depicts the applications and their dependencies]&#40;./media/architecture.png&#41;)
+![An image showing the services involved in the ACME Fitness Store. It depicts the applications and their dependencies](media/architecture.jpg)
+
+This application is composed of several services:
+
+* 3 Java Spring Boot applications:
+  * A catalog service for fetching available products
+  * A payment service for processing and approving payments for users' orders
+  * An identity service for referencing the authenticated user
+
+* 1 Python application:
+  * A cart service for managing a users' items that have been selected for purchase
+
+* 1 ASP.NET Core applications:
+  * An order service for placing orders to buy products that are in the users' carts
+
+* 1 NodeJS and static HTML Application
+  * A frontend shopping application
 
 ## What you will need
 
