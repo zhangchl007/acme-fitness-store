@@ -1006,7 +1006,7 @@ You can find the Application Insights in the same Resource Group where you creat
 
 Navigate to the `Application Map` blade:
 
-![An image showing the Application Map of Azure Application Insights](media/application-map.png)
+![An image showing the Application Map of Azure Application Insights](media/fitness-store-application-map.jpg)
 
 Navigate to the `Peforamnce` blade:
 
@@ -1017,9 +1017,13 @@ particularly SQL calls:
 
 ![An image showing the Dependencies section of the Performance Blade of Azure Application Insights](media/performance_dependencies.jpg)
 
+Navigate to the `Performance/Roles` blade - you can see the performance metrics for individual instances or roles:
+
+![An image showing the Roles section of the Performance Blade of Azure Application Insights](media/fitness-store-roles-in-performance-blade.jpg)
+
 Click on a SQL call to see the end-to-end transaction in context:
 
-![An image showing the end-to-end transaction of a SQL call](media/performance_sql.png)
+![An image showing the end-to-end transaction of a SQL call](media/fitness-store-end-to-end-transaction-details.jpg)
 
 Navigate to the `Failures/Exceptions` blade - you can see a collection of exceptions:
 
@@ -1043,7 +1047,7 @@ The REST controllers `ProductController`, and `PaymentController` have been inst
 
 You can see these custom metrics in the `Metrics` blade:
 
-![An image showing custom metrics instrumented by Micrometer](./media/custom-metrics.png)
+![An image showing custom metrics instrumented by Micrometer](media/fitness-store-custom-metrics.jpg)
 
 Navigate to the `Live Metrics` blade - you can see live metrics on screen with low latencies < 1 second:
 
@@ -1091,6 +1095,8 @@ Type and run the following Kusto query  to see errors and exceptions thrown by e
     | render piechart
 ```
 
+![An example output from the Ingress Logs](media/ingress-logs-in-log-analytics.jpg)
+
 Type and run the following Kusto query to see all in the inbound calls into Azure Spring Cloud:
 
 ```sql
@@ -1105,9 +1111,10 @@ Config Gateway managed by Azure Spring Cloud:
 ```sql
     AppPlatformSystemLogs
     | where LogType contains "SpringCloudGateway"
-    | project TimeGenerated, Level, LogType, ServiceName, Log
-    | sort by TimeGenerated
+    | project TimeGenerated,Log
 ```
+
+![An example out from the Spring Cloud Gateway Logs](media/spring-cloud-gateway-logs-in-log-analytics.jpg)
 
 Type and run the following Kusto query to see all the logs from the managed Spring Cloud
 Service Registry managed by Azure Spring Cloud:
