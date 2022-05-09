@@ -2,10 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "defaultValue": "",
-            "type": "String"
-        },
         "cacheName": {
             "defaultValue": "fitness-cache",
             "type": "String"
@@ -27,15 +23,28 @@
             "metadata": {
                 "description": "Database administrator password"
             }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be associated to the Resources"
+            },
+            "defaultValue": {
+                "environment": "lab"
+            }
         }
     },
     "functions": [],
-    "variables": {},
+    "variables": {
+        "location": "[resourceGroup().location]"
+    },
     "resources": [
         {
             "type": "Microsoft.Cache/Redis",
             "apiVersion": "2021-06-01",
             "name": "[parameters('cacheName')]",
+            "location": "[variables('location')]",
+            "tags": "[parameters('tags')]",
             "properties": {
                 "redisVersion": "4.1.14",
                 "sku": {
@@ -57,6 +66,8 @@
             "type": "Microsoft.DBforPostgreSQL/flexibleServers",
             "apiVersion": "2021-06-01",
             "name": "[parameters('dbServerName')]",
+            "location": "[variables('location')]",
+            "tags": "[parameters('tags')]",
             "sku": {
                 "name": "Standard_D2s_v3",
                 "tier": "GeneralPurpose"
