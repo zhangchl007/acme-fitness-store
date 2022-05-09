@@ -514,7 +514,7 @@ export POSTGRES_CONNECTION_STR=$(az spring-cloud connection show -g ${RESOURCE_G
 
 az spring-cloud app deploy --name ${ORDER_SERVICE_APP} \
     --builder ${CUSTOM_BUILDER} \
-    --env "DatabaseProvider=Postgres" "ConnectionStrings__OrderContext=${POSTGRES_CONNECTION_STR}" \
+    --env "DatabaseProvider=Postgres" "ConnectionStrings__OrderContext=${POSTGRES_CONNECTION_STR}" "DatabaseProvider=Postgres"\
     --source-path apps/acme-order
 
 # Deploy the Cart Service after retrieving the cache connection info
@@ -724,7 +724,7 @@ az spring-cloud app update --name ${CART_SERVICE_APP} \
     
 # Update the Order Service
 az spring-cloud app  update --name ${ORDER_SERVICE_APP} \
-    --env "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}" "ConnectionStrings__OrderContext=$POSTGRES_CONNECTION_STR"
+    --env "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}" "ConnectionStrings__OrderContext=$POSTGRES_CONNECTION_STR" "DatabaseProvider=Postgres"
 ```
 
 ### Login to the Application through Spring Cloud Gateway
@@ -906,7 +906,7 @@ az spring-cloud connection delete \
     --yes 
     
 az spring-cloud app update --name ${ORDER_SERVICE_APP} \
-    --env "ConnectionStrings__KeyVaultUri=${KEYVAULT_URI}" "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}"
+    --env "ConnectionStrings__KeyVaultUri=${KEYVAULT_URI}" "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}" "DatabaseProvider=Postgres"
 
 az spring-cloud app update --name ${CATALOG_SERVICE_APP} \
     --config-file-pattern catalog/default,catalog/key-vault \
