@@ -912,9 +912,6 @@ az spring-cloud app update --name ${IDENTITY_SERVICE_APP} \
     
 az spring-cloud app update --name ${CART_SERVICE_APP} \
     --env "CART_PORT=8080" "KEYVAULT_URI=${KEYVAULT_URI}" "AUTH_URL=https://${GATEWAY_URL}"
-    
-az spring-cloud app update --name ${FRONTEND_APP} \
-    --env "KEYVAULT_URI=${KEYVAULT_URI}"
 ```
 
 ## Unit 4 - Monitor End-to-End
