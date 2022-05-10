@@ -852,9 +852,6 @@ export CATALOG_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${CATALOG_
 
 az spring-cloud app identity assign --name ${IDENTITY_SERVICE_APP}
 export IDENTITY_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${IDENTITY_SERVICE_APP} | jq -r '.identity.principalId')
-
-az spring-cloud app identity assign --name ${FRONTEND_APP}
-export FRONTEND_APP_IDENTITY=$(az spring-cloud app show --name ${FRONTEND_APP} | jq -r '.identity.principalId')
 ```
 
 Add an access policy to Azure Key Vault to allow Managed Identities to read secrets.
@@ -871,9 +868,6 @@ az keyvault set-policy --name ${KEY_VAULT} \
 
 az keyvault set-policy --name ${KEY_VAULT} \
     --object-id ${IDENTITY_SERVICE_APP_IDENTITY} --secret-permissions get list
-
-az keyvault set-policy --name ${KEY_VAULT} \
-    --object-id ${FRONTEND_APP_IDENTITY} --secret-permissions get list
 ```
 
 ### Activate applications to load secrets from Azure Key Vault
@@ -948,7 +942,7 @@ Increase the sampling rate for the Application Insights binding.
 ```shell
 az spring-cloud build-service builder buildpack-binding set \
     --builder-name default \
-    -n default \
+    --name default \
     --type ApplicationInsights \
     --properties sampling-rate=100 connection_string=${INSTRUMENTATION_KEY}
 ```
@@ -960,7 +954,6 @@ sampling rate to take effect. For the non-java applications, this will allow the
 the Instrumentation Key from Key Vault. 
 
 ```shell
-az spring-cloud app restart -n ${FRONTEND_APP}
 az spring-cloud app restart -n ${CART_SERVICE_APP}
 az spring-cloud app restart -n ${ORDER_SERVICE_APP}
 az spring-cloud app restart -n ${IDENTITY_SERVICE_APP}
