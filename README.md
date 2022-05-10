@@ -1020,7 +1020,7 @@ Click on a SQL call to see the end-to-end transaction in context:
 
 Navigate to the `Failures/Exceptions` blade - you can see a collection of exceptions:
 
-![An image showing application failures graphed](media/failures.png)
+![An image showing application failures graphed](media/fitness-store-exceptions.jpg)
 
 Navigate to the `Metrics` blade - you can see metrics contributed by Spring Boot apps,
 Spring Cloud modules, and dependencies.
