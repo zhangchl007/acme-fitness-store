@@ -1037,7 +1037,7 @@ The REST controllers `ProductController`, and `PaymentController` have been inst
 
 You can see these custom metrics in the `Metrics` blade:
 
-![An image showing custom metrics instrumented by Micrometer](media/fitness-store-custom-metrics.jpg)
+![An image showing custom metrics instrumented by Micrometer](media/fitness-store-custom-metrics-with-payments-2.jpg)
 
 Navigate to the `Live Metrics` blade - you can see live metrics on screen with low latencies < 1 second:
 
