@@ -51,7 +51,6 @@ main() {
   set_keyvault_policy "$CART_SERVICE_APP"
   set_keyvault_policy "$ORDER_SERVICE_APP"
   set_keyvault_policy "$CATALOG_SERVICE_APP"
-  set_keyvault_policy "$FRONTEND_APP"
 }
 
 main
