@@ -444,8 +444,12 @@ open "https://${PORTAL_URL}"
 
 ## Unit 2 - Configure Single Sign On
 
-The following section steps through creating a Single Sign On Provider using Azure AD. 
+The following section steps through creating a Single Sign On Provider using Azure AD.
 To use an existing provider, skip ahead to [Using an Existing SSO Provider](#using-an-existing-sso-identity-provider)
+
+> Note:
+> This Unit is optional. The application will continue to function without completing this unit. Certain features will remain unavailable including: log in, adding items to the cart, or completing an order.
+> Continue on to [Unit 3 - Integrate with Azure Database for PostgreSQL and Azure Cache For Redis](#unit-3---integrate-with-azure-database-for-postgresql-and-azure-cache-for-redis) to continue this guide without configuring SSO.
 
 ### Register Application with Azure AD
 
