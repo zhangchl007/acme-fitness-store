@@ -812,6 +812,32 @@ az spring-cloud app update \
     --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=${REDIS_CONN_STR}" "AUTH_URL=https://${GATEWAY_URL}"
 ```
 
+### View Persisted Data
+
+Verify cart data is now persisted in Redis by adding a few items to your cart. Then, restart the cart service:
+
+```shell
+az spring-cloud app restart --name ${CART_SERVICE_APP}
+```
+
+Notice that after restarting the cart service, the items in your cart will now persist.
+
+Verify order data is now persisted in a PostgreSQL Database by placing an order. View your placed orders an the following URL:
+
+```text
+https://${GATEWAY_URL}/order/${USER_ID}
+```
+
+Your USER_ID is your username URL encoded.
+
+Now restart the order service application:
+
+```shell
+az spring-cloud app restart --name ${ORDER_SERVICE_APP}
+```
+
+After restarting, revisit the URL for your placed orders and notice that they persisted. 
+
 ## Unit 4 - Securely Load Application Secrets
 
 Use Azure Key Vault to store and load secrets to connect to Azure services.
@@ -1073,7 +1099,6 @@ The chart below shows `http_server_requests` and `Heap Memory Used`.
 
 ![An image showing metrics over time](media/metrics.jpg)
 
-
 Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback...
 The Spring Boot auto-configuration enables the instrumentation of requests handled by Spring MVC.
 The REST controllers `ProductController`, and `PaymentController` have been instrumented by the `@Timed` Micrometer annotation at class level.
@@ -1167,40 +1192,53 @@ Service Registry managed by Azure Spring Cloud:
 
 ## Unit 6 - Set Request Rate Limits
 
-Spring Cloud Gateway includes route filters from the Open Source version as well as several additional route filters. One of these additional filters is the `RateLimit` [filter](https://docs.vmware.com/en/VMware-Spring-Cloud-Gateway-for-Kubernetes/1.1/scg-k8s/GUID-route-filters.html#ratelimit-limiting-user-requests-filter).
+Spring Cloud Gateway includes route filters from the Open Source version as well as several additional route filters. One of these additional filters is the [RateLimit: Limiting user requests filter](https://docs.vmware.com/en/VMware-Spring-Cloud-Gateway-for-Kubernetes/1.1/scg-k8s/GUID-route-filters.html#ratelimit-limiting-user-requests-filter). The RateLimit filter limits the number of requests allowed per route during a time window.
 
-Learn more about the additional Spring Cloud Gateway route filters [here](https://docs.vmware.com/en/VMware-Spring-Cloud-Gateway-for-Kubernetes/1.1/scg-k8s/GUID-route-filters.html#filters-added-in-spring-cloud-gateway-for-kubernetes)
+When defining a Route, you can add the RateLimit filter by including it in the list of filters for the route. The filter accepts 4 options:
+
+* Number of requests accepted during the window.
+* Duration of the window: by default milliseconds, but you can use s, m or h suffix to specify it in seconds, minutes or hours.
+* (Optional) User partition key: it's also possible to apply rate limiting per user, that is, different users can have its own throughput allowed based on an identifier found in the request. Set whether the key is in a JWT claim or HTTP header with '' or '' syntax.
+* (Optional) It is possible to rate limit by IP addresses. Note, this cannot be combined with the rate limiting per user.
+
+The following example would limit all users to two requests every 5 seconds to the `/products` route:
+
+    ```json
+    {
+        "predicates": [
+          "Path=/products",
+          "Method=GET"
+        ],
+        "filters": [
+          "StripPrefix=0",
+          "RateLimit=2,5s"
+        ]
+    }
+    ```
+
+When the limit is exceeded, response will fail with `429 Too Many Requests` status.
 
 ### Update Spring Cloud Gateway Routes
 
-Update the route definitions for the catalog service:
+Apply the `RateLimit` filter to the `/products` route using the following command:
 
-```shell
+```bash
 az spring-cloud gateway route-config update \
     --name ${CATALOG_SERVICE_APP} \
     --app-name ${CATALOG_SERVICE_APP} \
     --routes-file azure/routes/catalog-service_rate-limit.json
 ```
 
-This updates the catalog service route definition to include the following definition:
+### Verify Request Rate Limits
 
-```json
-{
-    "predicates": [
-      "Path=/products",
-      "Method=GET"
-    ],
-    "filters": [
-      "StripPrefix=0",
-      "RateLimit=2,10s"
-    ],
-    "tags": [
-      "catalog"
-    ]
-  }
+Retrieve the URL for the `/products` route in Spring Cloud Gateway using the following command:
+
+```bash
+GATEWAY_URL=$(az spring-cloud gateway show | jq -r '.properties.url')
+echo "https://${GATEWAY_URL}/products"
 ```
 
-In the updated route config, `RateLimit=2,10s`, will limit requests to `/products` to 2 requests every 10 seconds. This route filter will prevent users from creating unnecessary traffic to the catalog.
+Make several requests to the URL for `/products` within a five second period to see requests fail with a status `429 Too Many Requests`.
 
 ## Unit 7 - Automate from idea to production
 
