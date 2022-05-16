@@ -781,7 +781,7 @@ Next, update the affected applications to use the newly created databases and re
 
 Restart the Catalog Service for the Service Connector to take effect:
 ```shell
-az spring app restart --name ${CATALOG_SERVICE_APP}
+az spring-cloud app restart --name ${CATALOG_SERVICE_APP}
 ```
 
 Retrieve the PostgreSQL connection string and update the Catalog Service:
