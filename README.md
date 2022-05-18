@@ -460,10 +460,16 @@ Prerequisites:
 The following section steps through creating a Single Sign On Provider using Azure AD.
 To use an existing provider, skip ahead to [Using an Existing Identity Provider](#using-an-existing-sso-identity-provider)
 
+Choose a unique display name for your Application Registration.
+
+```shell
+export AD_DISPLAY_NAME=change-me    # unique application display name
+```
+
 Create an Application registration with Azure AD and save the output.
 
 ```shell
-az ad app create --display-name acme-fitness-store > ad.json
+az ad app create --display-name ${AD_DISPLAY_NAME} > ad.json
 ```
 
 Retrieve the Application ID and collect the client secret:
@@ -553,14 +559,7 @@ echo "https://${PORTAL_URL}/login/oauth2/code/sso"
 Configure Spring Cloud Gateway with SSO enabled:
 
 ```shell
-export GATEWAY_URL=$(az spring-cloud gateway show | jq -r '.properties.url')
-
 az spring-cloud gateway update \
-    --api-description "ACME Fitness Store API" \
-    --api-title "ACME Fitness Store" \
-    --api-version "v1.0" \
-    --server-url "https://${GATEWAY_URL}" \
-    --allowed-origins "*" \
     --client-id ${CLIENT_ID} \
     --client-secret ${CLIENT_SECRET} \
     --scope ${SCOPE} \
@@ -932,6 +931,8 @@ az keyvault secret set --vault-name ${KEY_VAULT} \
     --name "SSO-PROVIDER-JWK-URI" --value ${JWK_SET_URI}
 ```
 
+> Note: Creating the SSO-PROVIDER-JWK-URI Secret can be skipped if not configuring Single Sign On
+
 Enable System Assigned Identities for applications and export identities to environment.
 
 ```shell
@@ -963,6 +964,8 @@ az keyvault set-policy --name ${KEY_VAULT} \
 az keyvault set-policy --name ${KEY_VAULT} \
     --object-id ${IDENTITY_SERVICE_APP_IDENTITY} --secret-permissions get list
 ```
+
+> Note: Identity Service will not exist if you haven't completed Unit 2. Skip configuring an identity or policy for this service if not configuring Single Sign-On at this point.
 
 ### Activate applications to load secrets from Azure Key Vault
 
