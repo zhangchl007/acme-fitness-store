@@ -429,7 +429,7 @@ You should see the ACME Fitness Store Application:
 ![An image of the ACME Fitness Store Application homepage](media/homepage.png)
 
 Explore the application, but notice that not everything is functioning yet. Continue on to
-Unit 2 to configure Single Sign On to enable the rest of the functionality. 
+Unit 2 to configure Single Sign On to enable the rest of the functionality.
 
 ### Explore the API using API Portal
 
@@ -442,16 +442,23 @@ export PORTAL_URL=$(az spring-cloud api-portal show | jq -r '.properties.url')
 open "https://${PORTAL_URL}"
 ```
 
-## Unit 2 - Configure Single Sign On
+## Unit 2 - Configure Single Sign-On
 
-The following section steps through creating a Single Sign On Provider using Azure AD.
-To use an existing provider, skip ahead to [Using an Existing SSO Provider](#using-an-existing-sso-identity-provider)
+In this Unit, you will configure Single Sign-On for Spring Cloud Gateway using Azure Active Directory or an existing Identity Provider.
+
+Prerequisites:
+
+* Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
+* Permissions to manage Azure Active Directory Application Registrations or Credentials for a Single Sign-On Identity Provider.
 
 > Note:
 > This Unit is optional. The application will continue to function without completing this unit. Certain features will remain unavailable including: log in, adding items to the cart, or completing an order.
 > Continue on to [Unit 3 - Integrate with Azure Database for PostgreSQL and Azure Cache For Redis](#unit-3---integrate-with-azure-database-for-postgresql-and-azure-cache-for-redis) to continue this guide without configuring SSO.
 
 ### Register Application with Azure AD
+
+The following section steps through creating a Single Sign On Provider using Azure AD.
+To use an existing provider, skip ahead to [Using an Existing Identity Provider](#using-an-existing-sso-identity-provider)
 
 Create an Application registration with Azure AD and save the output.
 
@@ -653,6 +660,10 @@ SSO provider. Learn more about API Authorization with API Portal [here](https://
 
 By default, several services use in-memory data storage. This unit will create persistent stores outside the applications and connect applications to those stores.
 
+Prerequisites:
+
+* Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
+
 ### Prepare your environment
 
 Create a bash script with environment variables by making a copy of the supplied template:
@@ -844,7 +855,12 @@ After restarting, revisit the URL for your placed orders and notice that they pe
 
 ## Unit 4 - Securely Load Application Secrets
 
-Use Azure Key Vault to store and load secrets to connect to Azure services.
+In this unit, you will use Azure Key Vault to securely store and load secrets to connect to Azure services.
+
+Prerequisites:
+
+* Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
+* Completion of [Unit 3 - Integrate with Azure Database for PostgreSQL and Azure Cache for Redis](#unit-3---integrate-with-azure-database-for-postgresql-and-azure-cache-for-redis)
 
 ### Prepare your environment for Key Vault
 
@@ -993,6 +1009,14 @@ az spring-cloud app update --name ${CART_SERVICE_APP} \
 ```
 
 ## Unit 5 - Monitor End-to-End
+
+In this unit you will explore live application metrics and query logs to know the health of your applications.
+
+Prerequisites:
+
+* Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
+* Completion of [Unit 3 - Integrate with Azure Database for PostgreSQL and Azure Cache for Redis](#unit-3---integrate-with-azure-database-for-postgresql-and-azure-cache-for-redis)
+* Completion of [Unit 4 - Securely Load Application Secrets](#unit-4---securely-load-application-secrets)
 
 ### Add Instrumentation Key to Key Vault
 
@@ -1195,6 +1219,14 @@ Service Registry managed by Azure Spring Cloud:
 ![An example output from service registry logs](media/service-registry-logs-in-log-analytics.jpg)
 
 ## Unit 6 - Set Request Rate Limits
+
+In this unit you will use Spring Cloud Gateway filters to apply rate limiting to your API.
+
+Prerequisites:
+
+* Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
+
+### Spring Cloud Gateway RateLimit Filter
 
 Spring Cloud Gateway includes route filters from the Open Source version as well as several additional route filters. One of these additional filters is the [RateLimit: Limiting user requests filter](https://docs.vmware.com/en/VMware-Spring-Cloud-Gateway-for-Kubernetes/1.1/scg-k8s/GUID-route-filters.html#ratelimit-limiting-user-requests-filter). The RateLimit filter limits the number of requests allowed per route during a time window.
 
