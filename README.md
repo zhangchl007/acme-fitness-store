@@ -207,7 +207,8 @@ az spring-cloud create --name ${SPRING_CLOUD_SERVICE} \
     --enable-application-configuration-service \
     --enable-service-registry \
     --enable-gateway \
-    --enable-api-portal
+    --enable-api-portal \
+    --build-pool-size S2 
 ```
 
 The service instance will take around 10-15 minutes to deploy.
@@ -316,11 +317,12 @@ az spring-cloud build-service builder create -n ${CUSTOM_BUILDER} \
 Create an application for each service:
 
 ```shell
-az spring-cloud app create --name ${CART_SERVICE_APP} --instance-count 1 --memory 1Gi
-az spring-cloud app create --name ${ORDER_SERVICE_APP} --instance-count 1 --memory 1Gi
-az spring-cloud app create --name ${PAYMENT_SERVICE_APP} --instance-count 1 --memory 1Gi
-az spring-cloud app create --name ${CATALOG_SERVICE_APP} --instance-count 1 --memory 1Gi
-az spring-cloud app create --name ${FRONTEND_APP} --instance-count 1 --memory 1Gi
+az spring-cloud app create --name ${CART_SERVICE_APP} --instance-count 1 --memory 1Gi &
+az spring-cloud app create --name ${ORDER_SERVICE_APP} --instance-count 1 --memory 1Gi &
+az spring-cloud app create --name ${PAYMENT_SERVICE_APP} --instance-count 1 --memory 1Gi &
+az spring-cloud app create --name ${CATALOG_SERVICE_APP} --instance-count 1 --memory 1Gi &
+az spring-cloud app create --name ${FRONTEND_APP} --instance-count 1 --memory 1Gi &
+wait
 ```
 
 ### Bind to Application Configuration Service
@@ -357,7 +359,8 @@ az spring-cloud gateway update \
     --api-title "Acme Fitness Store" \
     --api-version "v1.0" \
     --server-url "https://${GATEWAY_URL}" \
-    --allowed-origins "*"
+    --allowed-origins "*" \
+    --no-wait
 ```
 
 Create  routing rules for the applications:
@@ -392,28 +395,28 @@ Deploy and build each application, specifying its required parameters
 # Deploy Payment Service
 az spring-cloud app deploy --name ${PAYMENT_SERVICE_APP} \
     --config-file-pattern payment/default \
-    --source-path apps/acme-payment
+    --source-path apps/acme-payment 
 
 # Deploy Catalog Service
 az spring-cloud app deploy --name ${CATALOG_SERVICE_APP} \
     --config-file-pattern catalog/default \
-    --source-path apps/acme-catalog
+    --source-path apps/acme-catalog 
 
 # Deploy Order Service
 az spring-cloud app deploy --name ${ORDER_SERVICE_APP} \
     --builder ${CUSTOM_BUILDER} \
-    --source-path apps/acme-order
+    --source-path apps/acme-order 
 
 # Deploy Cart Service 
 az spring-cloud app deploy --name ${CART_SERVICE_APP} \
     --builder ${CUSTOM_BUILDER} \
     --env "CART_PORT=8080" \
-    --source-path apps/acme-cart
+    --source-path apps/acme-cart 
 
 # Deploy Frontend App
 az spring-cloud app deploy --name ${FRONTEND_APP} \
     --builder ${CUSTOM_BUILDER} \
-    --source-path apps/acme-shopping
+    --source-path apps/acme-shopping 
 ```
 
 ### Access the Application through Spring Cloud Gateway
@@ -563,7 +566,8 @@ az spring-cloud gateway update \
     --client-id ${CLIENT_ID} \
     --client-secret ${CLIENT_SECRET} \
     --scope ${SCOPE} \
-    --issuer-uri ${ISSUER_URI}
+    --issuer-uri ${ISSUER_URI} \
+    --no-wait
 ```
 
 ### Deploy the Identity Service Application
@@ -861,27 +865,13 @@ Prerequisites:
 * Completion of [Unit 1 - Deploy and Build Applications](#unit-1---deploy-and-build-applications)
 * Completion of [Unit 3 - Integrate with Azure Database for PostgreSQL and Azure Cache for Redis](#unit-3---integrate-with-azure-database-for-postgresql-and-azure-cache-for-redis)
 
-### Prepare your environment for Key Vault
+### Create Azure Key Vault and store secrets
 
-Create a bash script with environment variables by making a copy of the supplied template:
-
-```shell
-cp ./azure/setup-env-variables-keyvault-template.sh ./azure/setup-env-variables-keyvault.sh
-```
-
-Open `./azure/setup-env-variables-keyvault.sh` and enter the following information:
+Choose a unique name for your Key Vault and set an environment variable:
 
 ```shell
 export KEY_VAULT=change-me      # customize this
 ```
-
-Set the Environment.
-
-```shell
-source ./azure/setup-env-variables-keyvault.sh
-```
-
-### Create Azure Key Vault and store secrets
 
 Create an Azure Key Vault and store connection secrets.
 
@@ -1063,17 +1053,6 @@ az spring-cloud app restart -n ${CATALOG_SERVICE_APP}
 az spring-cloud app restart -n ${PAYMENT_SERVICE_APP}
 ```
 
-### Generate Traffic
-
-Use the ACME Fitness Shop Application to generate some traffic. Move throughout the application, view the catalog, or place an order.
-
-To continuously generate traffic, use the traffic generator:
-
-```shell
-cd traffic-generator
-GATEWAY_URL=https://${GATEWAY_URL} ./gradlew gatlingRun-com.vmware.acme.simulation.GuestSimulation
-```
-
 ### Get the log stream for an Application
 
 Use the following command to get the latest 100 lines of app console logs from the Catalog Service.
@@ -1093,6 +1072,20 @@ az spring-cloud app logs \
 ```
 
 You can use `az spring-cloud app logs -h` to explore more parameters and log stream functionalities.
+
+### Generate Traffic
+
+Use the ACME Fitness Shop Application to generate some traffic. Move throughout the application, view the catalog, or place an order.
+
+To continuously generate traffic, use the traffic generator:
+
+```shell
+cd traffic-generator
+GATEWAY_URL=https://${GATEWAY_URL} ./gradlew gatlingRun-com.vmware.acme.simulation.GuestSimulation
+cd -
+```
+
+Continue on to the next sections while the traffic generator runs.
 
 ### Start monitoring apps and dependencies - in Application Insights
 
