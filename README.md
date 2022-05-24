@@ -211,7 +211,7 @@ az spring-cloud create --name ${SPRING_CLOUD_SERVICE} \
     --build-pool-size S2 
 ```
 
-The service instance will take around 10-15 minutes to deploy.
+> Note: The service instance will take around 10-15 minutes to deploy.
 
 Set your default resource group name and cluster name using the following commands:
 
@@ -419,6 +419,8 @@ az spring-cloud app deploy --name ${FRONTEND_APP} \
     --source-path apps/acme-shopping 
 ```
 
+> Note: Deploying all applications will take 5-10 minutes
+
 ### Access the Application through Spring Cloud Gateway
 
 Retrieve the URL for Spring Cloud Gateway and open it in a browser:
@@ -608,6 +610,8 @@ az spring-cloud app deploy --name ${IDENTITY_SERVICE_APP} \
     --source-path apps/acme-identity
 ```
 
+> Note: The application will take around 3-5 minutes to deploy.
+
 ### Update Existing Applications
 
 Update the existing applications to use authorization information from Spring Cloud Gateway:
@@ -701,9 +705,11 @@ az redis create \
   --vm-size c0
 ```
 
+> Note: The redis cache will take around 15-20 minutes to deploy.
+
 ### Create an Azure Database for Postgres
 
-Using the Azure CLI, create an Azure Database for Postgres Flexible Server:
+Using the Azure CLI, create an Azure Database for PostgreSQL Flexible Server:
 
 ```shell
 az postgres flexible-server create --name ${POSTGRES_SERVER} \
@@ -725,6 +731,8 @@ az postgres flexible-server parameter set \
     --server-name ${POSTGRES_SERVER} \
     --name azure.extensions --value uuid-ossp
 ```
+
+> Note: The PostgreSQL Flexible Server will take 5-10 minutes to deploy
 
 Create a database for the order service:
 
@@ -840,7 +848,7 @@ az spring-cloud app restart --name ${CART_SERVICE_APP}
 
 Notice that after restarting the cart service, the items in your cart will now persist.
 
-Verify order data is now persisted in a PostgreSQL Database by placing an order. View your placed orders an the following URL:
+Verify order data is now persisted in a PostgreSQL Database by placing an order. View your placed orders with the following URL:
 
 ```text
 https://${GATEWAY_URL}/order/${USER_ID}
@@ -1374,6 +1382,8 @@ key                  = "dev.terraform.tfstate"
 Now you can run GitHub Actions in your repository. The `provision` workflow will provision all resources created in the first four units. An example run is seen below:
 
 ![Output from the provision workflow](media/provision.png)
+
+> Note: The entire provision workflow will run in approximately 60 minutes.
 
 Each application has a `Deploy` workflow that will redeploy the application when changes are made to that application. An example output from the catalog service is seen below:
 
