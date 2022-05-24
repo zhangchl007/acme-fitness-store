@@ -159,6 +159,8 @@ export LOG_ANALYTICS_WORKSPACE=log-analytics-name   # existing workspace or one 
 export REGION=region-name                           # choose a region with Enterprise tier support
 ```
 
+The REGION value should be one of available regions for Azure Spring Apps (e.g. eastus). Please visit [here](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=spring-apps&regions=all) for all available regions for Azure Spring Apps.
+
 Then, set the environment:
 
 ```shell
