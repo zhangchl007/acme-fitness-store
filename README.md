@@ -829,6 +829,10 @@ az spring connection create redis \
     --client-type java 
 ```
 
+> Note: Currently, the Azure Spring Apps CLI extension only allows for client types of java, springboot, or dotnet.
+> The cart service uses a client connection type of java because the connection strings are the same for python and java.
+> This will be changed when additional options become available in the CLI.
+
 ### Update Applications
 
 Next, update the affected applications to use the newly created databases and redis cache.
