@@ -447,8 +447,8 @@ Unit 2 to configure Single Sign On to enable the rest of the functionality.
 Assign an endpoint to API Portal and open it in a browser:
 
 ```shell
-az spring-cloud api-portal update --assign-endpoint true
-export PORTAL_URL=$(az spring-cloud api-portal show | jq -r '.properties.url')
+az spring api-portal update --assign-endpoint true
+export PORTAL_URL=$(az spring api-portal show | jq -r '.properties.url')
 
 open "https://${PORTAL_URL}"
 ```
@@ -576,7 +576,7 @@ echo "https://${PORTAL_URL}/login/oauth2/code/sso"
 Configure Spring Cloud Gateway with SSO enabled:
 
 ```shell
-az spring-cloud gateway update \
+az spring gateway update \
     --client-id ${CLIENT_ID} \
     --client-secret ${CLIENT_SECRET} \
     --scope ${SCOPE} \
@@ -589,25 +589,25 @@ az spring-cloud gateway update \
 Create the identity service application
 
 ```shell
-az spring-cloud app create --name ${IDENTITY_SERVICE_APP} --instance-count 1 --memory 1Gi
+az spring app create --name ${IDENTITY_SERVICE_APP} --instance-count 1 --memory 1Gi
 ```
 
 Bind the identity service to Application Configuration Service
 
 ```shell
-az spring-cloud application-configuration-service bind --app ${IDENTITY_SERVICE_APP}
+az spring application-configuration-service bind --app ${IDENTITY_SERVICE_APP}
 ```
 
 Bind the identity service to Service Registry.
 
 ```shell
-az spring-cloud service-registry bind --app ${IDENTITY_SERVICE_APP}
+az spring service-registry bind --app ${IDENTITY_SERVICE_APP}
 ```
 
 Create routing rules for the identity service application
 
 ```shell
-az spring-cloud gateway route-config create \
+az spring gateway route-config create \
     --name ${IDENTITY_SERVICE_APP} \
     --app-name ${IDENTITY_SERVICE_APP} \
     --routes-file azure/routes/identity-service.json
@@ -616,7 +616,7 @@ az spring-cloud gateway route-config create \
 Deploy the Identity Service:
 
 ```shell
-az spring-cloud app deploy --name ${IDENTITY_SERVICE_APP} \
+az spring app deploy --name ${IDENTITY_SERVICE_APP} \
     --env "JWK_URI=${JWK_SET_URI}" \
     --config-file-pattern identity/default \
     --source-path apps/acme-identity
@@ -630,11 +630,11 @@ Update the existing applications to use authorization information from Spring Cl
 
 ```shell
 # Update the Cart Service
-az spring-cloud app update --name ${CART_SERVICE_APP} \
+az spring app update --name ${CART_SERVICE_APP} \
     --env "AUTH_URL=https://${GATEWAY_URL}" "CART_PORT=8080" 
     
 # Update the Order Service
-az spring-cloud app  update --name ${ORDER_SERVICE_APP} \
+az spring app  update --name ${ORDER_SERVICE_APP} \
     --env "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}" 
 ```
 
@@ -661,9 +661,9 @@ be available. This includes adding items to the cart and placing an order.
 Configure API Portal with SSO enabled:
 
 ```shell
-export PORTAL_URL=$(az spring-cloud api-portal show | jq -r '.properties.url')
+export PORTAL_URL=$(az spring api-portal show | jq -r '.properties.url')
 
-az spring-cloud api-portal update \
+az spring api-portal update \
     --client-id ${CLIENT_ID} \
     --client-secret ${CLIENT_SECRET}\
     --scope "openid,profile,email" \
@@ -787,7 +787,7 @@ for those applications:
 
 ```shell
 # Bind order service to Postgres
-az spring-cloud connection create postgres-flexible \
+az spring connection create postgres-flexible \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection ${ORDER_SERVICE_DB_CONNECTION} \
@@ -801,7 +801,7 @@ az spring-cloud connection create postgres-flexible \
     
 
 # Bind catalog service to Postgres
-az spring-cloud connection create postgres-flexible \
+az spring connection create postgres-flexible \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection ${CATALOG_SERVICE_DB_CONNECTION} \
@@ -817,7 +817,7 @@ az spring-cloud connection create postgres-flexible \
 The Cart Service requires a connection to Azure Cache for Redis, create the Service Connector:
 
 ```shell
-az spring-cloud connection create redis \
+az spring connection create redis \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection $CART_SERVICE_CACHE_CONNECTION \
@@ -835,33 +835,33 @@ Next, update the affected applications to use the newly created databases and re
 
 Restart the Catalog Service for the Service Connector to take effect:
 ```shell
-az spring-cloud app restart --name ${CATALOG_SERVICE_APP}
+az spring app restart --name ${CATALOG_SERVICE_APP}
 ```
 
 Retrieve the PostgreSQL connection string and update the Catalog Service:
 ```shell
-POSTGRES_CONNECTION_STR=$(az spring-cloud connection show \
+POSTGRES_CONNECTION_STR=$(az spring connection show \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --deployment default \
     --connection ${ORDER_SERVICE_DB_CONNECTION} \
     --app ${ORDER_SERVICE_APP} | jq '.configurations[0].value' -r)
 
-az spring-cloud app update \
+az spring app update \
     --name order-service \
     --env "DatabaseProvider=Postgres" "ConnectionStrings__OrderContext=${POSTGRES_CONNECTION_STR}" "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}"
 ```
 
 Retrieve the Redis connection string and update the Cart Service:
 ```shell
-REDIS_CONN_STR=$(az spring-cloud connection show \
+REDIS_CONN_STR=$(az spring connection show \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --deployment default \
     --app ${CART_SERVICE_APP} \
     --connection ${CART_SERVICE_CACHE_CONNECTION} | jq -r '.configurations[0].value')
 
-az spring-cloud app update \
+az spring app update \
     --name cart-service \
     --env "CART_PORT=8080" "REDIS_CONNECTIONSTRING=${REDIS_CONN_STR}" "AUTH_URL=https://${GATEWAY_URL}"
 ```
@@ -871,7 +871,7 @@ az spring-cloud app update \
 Verify cart data is now persisted in Redis by adding a few items to your cart. Then, restart the cart service:
 
 ```shell
-az spring-cloud app restart --name ${CART_SERVICE_APP}
+az spring app restart --name ${CART_SERVICE_APP}
 ```
 
 Notice that after restarting the cart service, the items in your cart will now persist.
@@ -887,7 +887,7 @@ Your USER_ID is your username URL encoded.
 Now restart the order service application:
 
 ```shell
-az spring-cloud app restart --name ${ORDER_SERVICE_APP}
+az spring app restart --name ${ORDER_SERVICE_APP}
 ```
 
 After restarting, revisit the URL for your placed orders and notice that they persisted. 
@@ -962,17 +962,17 @@ az keyvault secret set --vault-name ${KEY_VAULT} \
 Enable System Assigned Identities for applications and export identities to environment.
 
 ```shell
-az spring-cloud app identity assign --name ${CART_SERVICE_APP}
-export CART_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${CART_SERVICE_APP} | jq -r '.identity.principalId')
+az spring app identity assign --name ${CART_SERVICE_APP}
+export CART_SERVICE_APP_IDENTITY=$(az spring app show --name ${CART_SERVICE_APP} | jq -r '.identity.principalId')
 
-az spring-cloud app identity assign --name ${ORDER_SERVICE_APP}
-export ORDER_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${ORDER_SERVICE_APP} | jq -r '.identity.principalId')
+az spring app identity assign --name ${ORDER_SERVICE_APP}
+export ORDER_SERVICE_APP_IDENTITY=$(az spring app show --name ${ORDER_SERVICE_APP} | jq -r '.identity.principalId')
 
-az spring-cloud app identity assign --name ${CATALOG_SERVICE_APP}
-export CATALOG_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${CATALOG_SERVICE_APP} | jq -r '.identity.principalId')
+az spring app identity assign --name ${CATALOG_SERVICE_APP}
+export CATALOG_SERVICE_APP_IDENTITY=$(az spring app show --name ${CATALOG_SERVICE_APP} | jq -r '.identity.principalId')
 
-az spring-cloud app identity assign --name ${IDENTITY_SERVICE_APP}
-export IDENTITY_SERVICE_APP_IDENTITY=$(az spring-cloud app show --name ${IDENTITY_SERVICE_APP} | jq -r '.identity.principalId')
+az spring app identity assign --name ${IDENTITY_SERVICE_APP}
+export IDENTITY_SERVICE_APP_IDENTITY=$(az spring app show --name ${IDENTITY_SERVICE_APP} | jq -r '.identity.principalId')
 ```
 
 Add an access policy to Azure Key Vault to allow Managed Identities to read secrets.
@@ -998,7 +998,7 @@ az keyvault set-policy --name ${KEY_VAULT} \
 Delete Service Connectors and activate applications to load secrets from Azure Key Vault.
 
 ```shell
-az spring-cloud connection delete \
+az spring connection delete \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection ${ORDER_SERVICE_DB_CONNECTION} \
@@ -1006,7 +1006,7 @@ az spring-cloud connection delete \
     --deployment default \
     --yes 
 
-az spring-cloud connection delete \
+az spring connection delete \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection ${CATALOG_SERVICE_DB_CONNECTION} \
@@ -1014,7 +1014,7 @@ az spring-cloud connection delete \
     --deployment default \
     --yes 
 
-az spring-cloud connection delete \
+az spring connection delete \
     --resource-group ${RESOURCE_GROUP} \
     --service ${SPRING_APP_SERVICE} \
     --connection ${CART_SERVICE_CACHE_CONNECTION} \
@@ -1022,18 +1022,18 @@ az spring-cloud connection delete \
     --deployment default \
     --yes 
     
-az spring-cloud app update --name ${ORDER_SERVICE_APP} \
+az spring app update --name ${ORDER_SERVICE_APP} \
     --env "ConnectionStrings__KeyVaultUri=${KEYVAULT_URI}" "AcmeServiceSettings__AuthUrl=https://${GATEWAY_URL}" "DatabaseProvider=Postgres"
 
-az spring-cloud app update --name ${CATALOG_SERVICE_APP} \
+az spring app update --name ${CATALOG_SERVICE_APP} \
     --config-file-pattern catalog/default,catalog/key-vault \
     --env "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_ENDPOINT=${KEYVAULT_URI}" "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_NAME='acme-fitness-store-vault'" "SPRING_PROFILES_ACTIVE=default,key-vault"
     
-az spring-cloud app update --name ${IDENTITY_SERVICE_APP} \
+az spring app update --name ${IDENTITY_SERVICE_APP} \
     --config-file-pattern identity/default,identity/key-vault \
     --env "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_ENDPOINT=${KEYVAULT_URI}" "SPRING_CLOUD_AZURE_KEYVAULT_SECRET_PROPERTY_SOURCES_0_NAME='acme-fitness-store-vault'" "SPRING_PROFILES_ACTIVE=default,key-vault"
     
-az spring-cloud app update --name ${CART_SERVICE_APP} \
+az spring app update --name ${CART_SERVICE_APP} \
     --env "CART_PORT=8080" "KEYVAULT_URI=${KEYVAULT_URI}" "AUTH_URL=https://${GATEWAY_URL}"
 ```
 
@@ -1068,7 +1068,7 @@ az keyvault secret set --vault-name ${KEY_VAULT} \
 Increase the sampling rate for the Application Insights binding.
 
 ```shell
-az spring-cloud build-service builder buildpack-binding set \
+az spring build-service builder buildpack-binding set \
     --builder-name default \
     --name default \
     --type ApplicationInsights \
@@ -1082,11 +1082,11 @@ sampling rate to take effect. For the non-java applications, this will allow the
 the Instrumentation Key from Key Vault. 
 
 ```shell
-az spring-cloud app restart -n ${CART_SERVICE_APP}
-az spring-cloud app restart -n ${ORDER_SERVICE_APP}
-az spring-cloud app restart -n ${IDENTITY_SERVICE_APP}
-az spring-cloud app restart -n ${CATALOG_SERVICE_APP}
-az spring-cloud app restart -n ${PAYMENT_SERVICE_APP}
+az spring app restart -n ${CART_SERVICE_APP}
+az spring app restart -n ${ORDER_SERVICE_APP}
+az spring app restart -n ${IDENTITY_SERVICE_APP}
+az spring app restart -n ${CATALOG_SERVICE_APP}
+az spring app restart -n ${PAYMENT_SERVICE_APP}
 ```
 
 ### Get the log stream for an Application
@@ -1094,7 +1094,7 @@ az spring-cloud app restart -n ${PAYMENT_SERVICE_APP}
 Use the following command to get the latest 100 lines of app console logs from the Catalog Service.
 
 ```shell
-az spring-cloud app logs \
+az spring app logs \
     -n ${CATALOG_SERVICE_APP} \
     --lines 100
 ```
@@ -1102,12 +1102,12 @@ az spring-cloud app logs \
 By adding the `-f` parameter you can get real-time log streaming from an app. Try log streaming for the Catalog Service.
 
 ```shell
-az spring-cloud app logs \
+az spring app logs \
     -n ${CATALOG_SERVICE_APP} \
     -f
 ```
 
-You can use `az spring-cloud app logs -h` to explore more parameters and log stream functionalities.
+You can use `az spring app logs -h` to explore more parameters and log stream functionalities.
 
 ### Generate Traffic
 
@@ -1289,7 +1289,7 @@ When the limit is exceeded, response will fail with `429 Too Many Requests` stat
 Apply the `RateLimit` filter to the `/products` route using the following command:
 
 ```bash
-az spring-cloud gateway route-config update \
+az spring gateway route-config update \
     --name ${CATALOG_SERVICE_APP} \
     --app-name ${CATALOG_SERVICE_APP} \
     --routes-file azure/routes/catalog-service_rate-limit.json
@@ -1300,7 +1300,7 @@ az spring-cloud gateway route-config update \
 Retrieve the URL for the `/products` route in Spring Cloud Gateway using the following command:
 
 ```bash
-GATEWAY_URL=$(az spring-cloud gateway show | jq -r '.properties.url')
+GATEWAY_URL=$(az spring gateway show | jq -r '.properties.url')
 echo "https://${GATEWAY_URL}/products"
 ```
 
