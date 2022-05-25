@@ -217,7 +217,7 @@ Set your default resource group name and cluster name using the following comman
 az configure --defaults \
     group=${RESOURCE_GROUP} \
     location=${REGION} \
-    spring-cloud=${SPRING_APP_SERVICE}
+    spring=${SPRING_APP_SERVICE}
 ```
 
 ### Configure Log Analytics for Azure Spring Apps
